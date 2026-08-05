@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f9fc;
+  --foreground: #3c3c3c;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-nunito);
+
+  --color-duo-green: #58cc02;
+  --color-duo-green-dark: #4caf00;
+  --color-duo-green-light: #d7ffb8;
+  --color-duo-blue: #1cb0f6;
+  --color-duo-blue-dark: #1899d6;
+  --color-duo-blue-light: #ddf4ff;
+  --color-duo-purple: #ce82ff;
+  --color-duo-purple-dark: #a568cc;
+  --color-duo-purple-light: #f3e5ff;
+  --color-duo-yellow: #ffc800;
+  --color-duo-yellow-dark: #e6b400;
+  --color-duo-yellow-light: #fff4cc;
+  --color-duo-red: #ff4b4b;
+  --color-duo-red-dark: #ea2b2b;
+  --color-duo-red-light: #ffdfe0;
+  --color-duo-gray: #4b4b4b;
+  --color-duo-gray-soft: #777777;
+  --color-duo-gray-light: #e5e5e5;
+  --color-duo-bg: #f7f9fc;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), "Nunito", Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  /* Chunky, 3D-press Duolingo-style buttons -- each variant is self-contained
+     (Tailwind v4 @apply cannot reference another custom component class) */
+  .btn-duo-green,
+  .btn-duo-blue,
+  .btn-duo-purple,
+  .btn-duo-yellow,
+  .btn-duo-red,
+  .btn-duo-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border-b-4 px-6 py-3
+      text-sm font-extrabold uppercase tracking-wide transition-all
+      active:translate-y-1 active:border-b-0
+      disabled:pointer-events-none disabled:opacity-50 cursor-pointer;
+  }
+  .btn-duo-green {
+    @apply border-duo-green-dark bg-duo-green text-white hover:brightness-105;
+  }
+  .btn-duo-blue {
+    @apply border-duo-blue-dark bg-duo-blue text-white hover:brightness-105;
+  }
+  .btn-duo-purple {
+    @apply border-duo-purple-dark bg-duo-purple text-white hover:brightness-105;
+  }
+  .btn-duo-yellow {
+    @apply border-duo-yellow-dark bg-duo-yellow text-duo-gray hover:brightness-105;
+  }
+  .btn-duo-red {
+    @apply border-duo-red-dark bg-duo-red text-white hover:brightness-105;
+  }
+  .btn-duo-outline {
+    @apply border-2 border-b-4 border-duo-gray-light bg-white text-duo-gray-soft hover:bg-slate-50;
+  }
+  .btn-duo-sm {
+    @apply px-4 py-2 text-xs;
+  }
+
+  /* Chunky flat-shadow cards */
+  .card-duo {
+    @apply rounded-3xl border-2 border-duo-gray-light bg-white p-5 shadow-[0_4px_0_0_#e5e5e5];
+  }
+  .card-duo-green {
+    @apply rounded-3xl border-2 border-duo-green-dark bg-duo-green-light p-5 shadow-[0_4px_0_0_#4caf00];
+  }
+  .card-duo-blue {
+    @apply rounded-3xl border-2 border-duo-blue-dark bg-duo-blue-light p-5 shadow-[0_4px_0_0_#1899d6];
+  }
+  .card-duo-yellow {
+    @apply rounded-3xl border-2 border-duo-yellow-dark bg-duo-yellow-light p-5 shadow-[0_4px_0_0_#e6b400];
+  }
+  .card-duo-purple {
+    @apply rounded-3xl border-2 border-duo-purple-dark bg-duo-purple-light p-5 shadow-[0_4px_0_0_#a568cc];
+  }
+  .card-duo-red {
+    @apply rounded-3xl border-2 border-duo-red-dark bg-duo-red-light p-5 shadow-[0_4px_0_0_#ea2b2b];
+  }
+
+  .badge-duo {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold;
+  }
+
+  .input-duo {
+    @apply w-full rounded-2xl border-2 border-duo-gray-light bg-white px-4 py-2.5 text-sm font-semibold
+      text-duo-gray outline-none transition-colors focus:border-duo-blue;
+  }
+}

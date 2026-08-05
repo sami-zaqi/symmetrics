@@ -1,0 +1,23 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.env
+*.pyc
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings
+.claude/
+
+# Internal business docs -- kept local only, never published
+Business_Plan_Konsolidasi.docx
+*.docx
