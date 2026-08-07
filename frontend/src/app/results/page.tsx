@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
 import StepProgress from "@/components/StepProgress";
+import { DescriptivesTable, StatSummary } from "@/components/ResultTables";
 
 export default function ResultsPage() {
   const {
@@ -109,15 +110,11 @@ export default function ResultsPage() {
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-1 text-sm font-black text-duo-gray">📋 Statistik Deskriptif</h3>
-            <pre className="overflow-x-auto rounded-2xl bg-slate-50 p-3 text-xs">
-              {JSON.stringify(currentResult.descriptives, null, 2)}
-            </pre>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">📋 Statistik Deskriptif</h3>
+            <DescriptivesTable rows={currentResult.descriptives} />
 
-            <h3 className="mt-4 mb-1 text-sm font-black text-duo-gray">📈 Hasil Uji</h3>
-            <pre className="overflow-x-auto rounded-2xl bg-slate-50 p-3 text-xs">
-              {JSON.stringify(currentResult.test_statistics, null, 2)}
-            </pre>
+            <h3 className="mt-4 mb-2 text-sm font-black text-duo-gray">📈 Hasil Uji</h3>
+            <StatSummary stats={currentResult.test_statistics} />
           </div>
 
           {currentResult.charts.length > 0 && (
