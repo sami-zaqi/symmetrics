@@ -11,6 +11,8 @@ TEST_NAMES_ID: dict[str, str] = {
     "simple_linear_regression": "Regresi Linear Sederhana",
     "chi_square": "Uji Chi-Square",
     "cronbach_alpha": "Uji Reliabilitas (Cronbach's Alpha)",
+    "logistic_regression": "Regresi Logistik",
+    "diagnostic_test": "Uji Diagnostik (Sensitivitas & Spesifisitas)",
 }
 
 NONPARAMETRIC_FALLBACK: dict[str, str] = {

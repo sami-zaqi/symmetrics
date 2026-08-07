@@ -16,6 +16,8 @@ const NEEDS_XY: TestId[] = [
   "chi_square",
 ];
 const NEEDS_ITEMS: TestId[] = ["cronbach_alpha", "descriptive_statistics"];
+const NEEDS_LOGISTIC: TestId[] = ["logistic_regression"];
+const NEEDS_DIAGNOSTIC: TestId[] = ["diagnostic_test"];
 
 export default function WizardPage() {
   const router = useRouter();
@@ -84,6 +86,8 @@ export default function WizardPage() {
               { value: "hubungan", label: "Melihat hubungan antar variabel" },
               { value: "prediksi", label: "Memprediksi nilai" },
               { value: "reliabilitas", label: "Menguji reliabilitas kuesioner" },
+              { value: "faktor_risiko", label: "Faktor-faktor yang berhubungan dengan suatu kejadian" },
+              { value: "evaluasi_diagnostik", label: "Evaluasi alat/uji diagnostik" },
             ]}
             onChange={(v) => update({ tujuan: v as WizardAnswers["tujuan"] })}
           />
@@ -174,13 +178,61 @@ export default function WizardPage() {
                 />
               </>
             )}
+            {testId === "cronbach_alpha" && dataset.constructs.length > 0 && (
+              <div className="sm:col-span-2">
+                <p className="mb-1 text-sm font-bold text-duo-gray">Pilih dari Konstruk yang Sudah Dirancang</p>
+                <div className="flex flex-wrap gap-2">
+                  {dataset.constructs.map((c) => (
+                    <button
+                      key={c.name}
+                      onClick={() => updateMapping({ items: c.items })}
+                      className="rounded-xl border-2 border-duo-yellow-dark bg-duo-yellow-light px-3 py-1.5 text-xs font-bold text-duo-gray"
+                    >
+                      🧩 {c.name} ({c.items.length} item)
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {NEEDS_ITEMS.includes(testId) && (
               <MultiSelect
                 label={testId === "cronbach_alpha" ? "Item Kuesioner" : "Variabel"}
-                options={numericCols}
+                options={testId === "cronbach_alpha" ? [...numericCols, ...categoricalCols] : numericCols}
                 value={mapping.items ?? []}
                 onChange={(v) => updateMapping({ items: v })}
               />
+            )}
+            {NEEDS_LOGISTIC.includes(testId) && (
+              <>
+                <Select
+                  label="Variabel Dependen (kejadian, biner)"
+                  options={categoricalCols}
+                  value={mapping.dependent ?? ""}
+                  onChange={(v) => updateMapping({ dependent: v })}
+                />
+                <MultiSelect
+                  label="Variabel Independen (faktor risiko/prediktor)"
+                  options={[...numericCols, ...categoricalCols]}
+                  value={mapping.independents ?? []}
+                  onChange={(v) => updateMapping({ independents: v })}
+                />
+              </>
+            )}
+            {NEEDS_DIAGNOSTIC.includes(testId) && (
+              <>
+                <Select
+                  label="Hasil Uji Diagnostik (biner)"
+                  options={categoricalCols}
+                  value={mapping.independent ?? ""}
+                  onChange={(v) => updateMapping({ independent: v })}
+                />
+                <Select
+                  label="Status Penyakit (baku emas, biner)"
+                  options={categoricalCols}
+                  value={mapping.dependent ?? ""}
+                  onChange={(v) => updateMapping({ dependent: v })}
+                />
+              </>
             )}
           </div>
 

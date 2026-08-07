@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  body { margin: 0; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #f7f9fc; font-family: -apple-system, "Segoe UI", Arial, sans-serif; color: #3c3c3c; }
+  .mark { width: 64px; height: 64px; animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: 0.7; } }
+  h1 { font-size: 20px; font-weight: 800; color: #58CC02; margin: 16px 0 4px; }
+  p { font-size: 13px; color: #777; margin: 0; }
+</style>
+</head>
+<body>
+  <svg class="mark" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="4" y1="0" x2="36" y2="0" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#58CC02" />
+        <stop offset="1" stop-color="#1CB0F6" />
+      </linearGradient>
+    </defs>
+    <line x1="4" y1="29" x2="36" y2="29" stroke="#E5E5E5" stroke-width="2" stroke-linecap="round" />
+    <line x1="20" y1="7" x2="20" y2="29" stroke="#E5E5E5" stroke-width="2" stroke-linecap="round" stroke-dasharray="2.5 3.5" />
+    <path d="M6,29 C10,29 12,10 20,9 C28,10 30,29 34,29" fill="none" stroke="url(#g)" stroke-width="3.5" stroke-linecap="round" />
+  </svg>
+  <h1>Symmetrics</h1>
+  <p>Menyalakan server, mohon tunggu...</p>
+</body>
+</html>

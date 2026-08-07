@@ -55,12 +55,12 @@ export default function ResultsPage() {
     );
   }
 
-  async function generateNarrative(mode: "auto" | "ai" | "template" = "auto") {
+  async function generateNarrative(mode: "auto" | "ai" | "template" = "auto", forceRegenerate = false) {
     if (!dataset || !currentResult) return;
     setNarrativeLoading(true);
     setNarrativeError(null);
     try {
-      const res = await api.generateNarrative(dataset.session_id, currentResult.result_id, mode);
+      const res = await api.generateNarrative(dataset.session_id, currentResult.result_id, mode, forceRegenerate);
       setNarrativeText(res.narrative_text);
       setNarrativeSource(res.source);
     } catch (e) {
@@ -185,13 +185,11 @@ export default function ResultsPage() {
                   className="input-duo mt-2 leading-relaxed"
                 />
                 <button
-                  onClick={() => {
-                    setNarrativeText("");
-                    setNarrativeSource(null);
-                  }}
-                  className="mt-2 text-xs font-bold text-duo-gray-soft underline"
+                  onClick={() => generateNarrative(narrativeMode, true)}
+                  disabled={narrativeLoading}
+                  className="mt-2 text-xs font-bold text-duo-gray-soft underline disabled:opacity-50"
                 >
-                  ↺ Buat ulang
+                  {narrativeLoading ? "⏳ Membuat ulang..." : "↺ Buat ulang (panggilan baru)"}
                 </button>
               </>
             )}

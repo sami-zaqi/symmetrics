@@ -1,10 +1,14 @@
 import type {
   AssumptionResult,
+  CleaningStrategy,
+  ColumnType,
+  DataSchema,
   DatasetSummary,
   MethodUsed,
   NarrativeResponse,
   TestId,
   TestResult,
+  ValueCount,
   VariableMapping,
   WizardAnswers,
   WizardRecommendation,
@@ -25,10 +29,52 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  upload(file: File): Promise<DatasetSummary> {
+  upload(file: File, sessionId?: string): Promise<DatasetSummary> {
     const formData = new FormData();
     formData.append("file", file);
+    if (sessionId) formData.append("session_id", sessionId);
     return request<DatasetSummary>("/api/upload", { method: "POST", body: formData });
+  },
+
+  createSchema(schema: DataSchema): Promise<{ session_id: string; schema: DataSchema }> {
+    return request("/api/schema/create", { method: "POST", body: JSON.stringify(schema) });
+  },
+
+  async downloadTemplate(sessionId: string): Promise<Blob> {
+    const res = await fetch(`${BASE_URL}/api/schema/${sessionId}/template`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || "Gagal mengunduh template");
+    }
+    return res.blob();
+  },
+
+  cleanData(sessionId: string, strategy: CleaningStrategy): Promise<DatasetSummary> {
+    return request<DatasetSummary>("/api/upload/clean", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId, strategy }),
+    });
+  },
+
+  getColumnValues(sessionId: string, column: string): Promise<ValueCount[]> {
+    return request<ValueCount[]>("/api/upload/column-values", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId, column }),
+    });
+  },
+
+  remapValues(sessionId: string, column: string, mapping: Record<string, string>): Promise<DatasetSummary> {
+    return request<DatasetSummary>("/api/upload/remap-values", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId, column, mapping }),
+    });
+  },
+
+  setColumnType(sessionId: string, column: string, dtype: ColumnType): Promise<DatasetSummary> {
+    return request<DatasetSummary>("/api/upload/set-type", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId, column, dtype }),
+    });
   },
 
   wizardRecommend(answers: WizardAnswers): Promise<WizardRecommendation> {
@@ -69,11 +115,17 @@ export const api = {
   generateNarrative(
     sessionId: string,
     resultId: string,
-    mode: "auto" | "ai" | "template" = "auto"
+    mode: "auto" | "ai" | "template" = "auto",
+    forceRegenerate = false
   ): Promise<NarrativeResponse> {
     return request<NarrativeResponse>("/api/narrative/generate", {
       method: "POST",
-      body: JSON.stringify({ session_id: sessionId, result_id: resultId, mode }),
+      body: JSON.stringify({
+        session_id: sessionId,
+        result_id: resultId,
+        mode,
+        force_regenerate: forceRegenerate,
+      }),
     });
   },
 

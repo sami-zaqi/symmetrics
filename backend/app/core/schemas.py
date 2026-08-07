@@ -18,6 +18,8 @@ TestId = Literal[
     "simple_linear_regression",
     "chi_square",
     "cronbach_alpha",
+    "logistic_regression",
+    "diagnostic_test",
 ]
 
 MethodUsed = Literal["parametric", "nonparametric_fallback", "as_selected"]
@@ -32,17 +34,84 @@ class ColumnInfo(BaseModel):
     unique_count: int
 
 
+class OutlierInfo(BaseModel):
+    column: str
+    count: int
+    lower_bound: float
+    upper_bound: float
+
+
+class CleanDataRequest(BaseModel):
+    session_id: str
+    strategy: Literal["listwise_deletion", "mean_mode_imputation"]
+
+
+class ColumnValuesRequest(BaseModel):
+    session_id: str
+    column: str
+
+
+class ValueCount(BaseModel):
+    value: str
+    count: int
+
+
+class RemapValuesRequest(BaseModel):
+    session_id: str
+    column: str
+    mapping: dict[str, str]
+
+
+class SetColumnTypeRequest(BaseModel):
+    session_id: str
+    column: str
+    dtype: ColumnType
+
+
+# ---------- Data schema (prospective data design / "Data Entry Builder") ----------
+
+VariableScale = Literal["nominal", "ordinal", "interval", "rasio"]
+
+
+class CategoryCode(BaseModel):
+    label: str
+    value: int
+
+
+class VariableDef(BaseModel):
+    name: str
+    label: str
+    scale: VariableScale
+    categories: list[CategoryCode] | None = None
+
+
+class ConstructDef(BaseModel):
+    name: str
+    items: list[str]
+
+
+class DataSchema(BaseModel):
+    variables: list[VariableDef]
+    constructs: list[ConstructDef] = Field(default_factory=list)
+    missing_value_symbol: str = ""
+
+
 class DatasetSummary(BaseModel):
     session_id: str
     row_count: int
     columns: list[ColumnInfo]
     preview_rows: list[dict[str, Any]]
+    outliers: list[OutlierInfo] = Field(default_factory=list)
+    constructs: list[ConstructDef] = Field(default_factory=list)
 
 
 # ---------- Wizard ----------
 
 class WizardAnswers(BaseModel):
-    tujuan: Literal["deskriptif", "bandingkan", "hubungan", "prediksi", "reliabilitas"]
+    tujuan: Literal[
+        "deskriptif", "bandingkan", "hubungan", "prediksi", "reliabilitas",
+        "faktor_risiko", "evaluasi_diagnostik",
+    ]
     jumlah_kelompok: Literal["dua", "lebih_dari_dua"] | None = None
     desain: Literal["independen", "berpasangan"] | None = None
     tipe_dv: Literal["numerik", "kategorik"] | None = None
@@ -61,6 +130,7 @@ class VariableMapping(BaseModel):
     independent: str | None = None
     grouping: str | None = None
     items: list[str] | None = None  # for cronbach_alpha (multiple questionnaire items)
+    independents: list[str] | None = None  # for logistic_regression (multiple predictors)
 
 
 # ---------- Assumptions ----------
@@ -74,7 +144,7 @@ class AssumptionCheckRequest(BaseModel):
 class AssumptionTestOutcome(BaseModel):
     name: str
     statistic: float
-    p_value: float
+    p_value: float | None = None
     passed: bool
     detail: str
 
@@ -125,6 +195,7 @@ class NarrativeRequest(BaseModel):
     session_id: str
     result_id: str
     mode: Literal["auto", "ai", "template"] = "auto"
+    force_regenerate: bool = False
 
 
 class NarrativeResponse(BaseModel):

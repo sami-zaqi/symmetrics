@@ -6,10 +6,17 @@ import { LogoMark } from "@/components/Logo";
 
 const MENU = [
   {
+    href: "/desain-data",
+    icon: "🧩",
+    title: "Desain Data (Opsional)",
+    desc: "Belum punya data? Rancang struktur variabel & kuesioner dulu sebelum mulai mengumpulkan data.",
+    style: "card-duo-yellow",
+  },
+  {
     href: "/upload",
     icon: "📁",
     title: "1. Unggah Data",
-    desc: "Unggah file CSV atau Excel data penelitian Anda.",
+    desc: "Sudah punya file? Unggah CSV/Excel data penelitian Anda langsung.",
     style: "card-duo-yellow",
   },
   {

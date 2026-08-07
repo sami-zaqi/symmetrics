@@ -7,6 +7,7 @@ from typing import Any
 import pandas as pd
 
 from app.config import settings
+from app.core.schemas import ColumnType, DataSchema
 
 
 @dataclass
@@ -14,6 +15,9 @@ class SessionData:
     df: pd.DataFrame
     wizard_answers: dict[str, Any] | None = None
     results: dict[str, Any] = field(default_factory=dict)
+    narrative_cache: dict[str, tuple[str, bool, str]] = field(default_factory=dict)
+    schema: DataSchema | None = None
+    type_overrides: dict[str, ColumnType] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.utcnow)
     last_accessed: datetime = field(default_factory=datetime.utcnow)
 
@@ -30,6 +34,13 @@ class SessionStore:
         session_id = str(uuid.uuid4())
         with self._lock:
             self._sessions[session_id] = SessionData(df=df)
+        return session_id
+
+    def create_from_schema(self, schema: DataSchema) -> str:
+        session_id = str(uuid.uuid4())
+        empty_df = pd.DataFrame(columns=[v.name for v in schema.variables])
+        with self._lock:
+            self._sessions[session_id] = SessionData(df=empty_df, schema=schema)
         return session_id
 
     def get(self, session_id: str) -> SessionData | None:

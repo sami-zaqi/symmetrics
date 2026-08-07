@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.core.schemas import ChartRef, RunTestRequest, TestResult
 from app.core.session_store import session_store
-from app.stats import anova, chi_square, correlation, descriptive, regression, reliability, ttest
+from app.stats import anova, chi_square, correlation, descriptive, diagnostic, logistic, regression, reliability, ttest
 from app.stats.charts import boxplot, histogram, scatter
 from app.stats.registry import TEST_NAMES_ID
 
@@ -72,6 +72,12 @@ def run_test(req: RunTestRequest):
 
         elif test_id == "cronbach_alpha":
             payload = reliability.run_cronbach(df, m.items)
+
+        elif test_id == "logistic_regression":
+            payload = logistic.run_binary(df, m.dependent, m.independents or [])
+
+        elif test_id == "diagnostic_test":
+            payload = diagnostic.run(df, m.independent, m.dependent)
 
         else:
             raise HTTPException(status_code=400, detail=f"Uji '{test_id}' belum didukung.")

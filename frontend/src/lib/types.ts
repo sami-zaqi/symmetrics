@@ -7,14 +7,62 @@ export interface ColumnInfo {
   unique_count: number;
 }
 
+export interface OutlierInfo {
+  column: string;
+  count: number;
+  lower_bound: number;
+  upper_bound: number;
+}
+
+export type VariableScale = "nominal" | "ordinal" | "interval" | "rasio";
+
+export interface CategoryCode {
+  label: string;
+  value: number;
+}
+
+export interface VariableDef {
+  name: string;
+  label: string;
+  scale: VariableScale;
+  categories?: CategoryCode[] | null;
+}
+
+export interface ConstructDef {
+  name: string;
+  items: string[];
+}
+
+export interface DataSchema {
+  variables: VariableDef[];
+  constructs: ConstructDef[];
+  missing_value_symbol: string;
+}
+
 export interface DatasetSummary {
   session_id: string;
   row_count: number;
   columns: ColumnInfo[];
   preview_rows: Record<string, unknown>[];
+  outliers: OutlierInfo[];
+  constructs: ConstructDef[];
 }
 
-export type Tujuan = "deskriptif" | "bandingkan" | "hubungan" | "prediksi" | "reliabilitas";
+export type CleaningStrategy = "listwise_deletion" | "mean_mode_imputation";
+
+export interface ValueCount {
+  value: string;
+  count: number;
+}
+
+export type Tujuan =
+  | "deskriptif"
+  | "bandingkan"
+  | "hubungan"
+  | "prediksi"
+  | "reliabilitas"
+  | "faktor_risiko"
+  | "evaluasi_diagnostik";
 
 export interface WizardAnswers {
   tujuan: Tujuan;
@@ -36,7 +84,9 @@ export type TestId =
   | "spearman_correlation"
   | "simple_linear_regression"
   | "chi_square"
-  | "cronbach_alpha";
+  | "cronbach_alpha"
+  | "logistic_regression"
+  | "diagnostic_test";
 
 export interface WizardRecommendation {
   recommended_test: TestId;
@@ -50,6 +100,7 @@ export interface VariableMapping {
   independent?: string | null;
   grouping?: string | null;
   items?: string[] | null;
+  independents?: string[] | null;
 }
 
 export interface AssumptionTestOutcome {

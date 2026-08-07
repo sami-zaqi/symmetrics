@@ -19,6 +19,7 @@ const COLOR_STYLES: Record<NavColor, { icon: string; activeBg: string; activeBor
 
 const NAV_ITEMS: { href: string; label: string; icon: string; color: NavColor }[] = [
   { href: "/", label: "Beranda", icon: "🏠", color: "blue" },
+  { href: "/desain-data", label: "Desain Data", icon: "🧩", color: "yellow" },
   { href: "/upload", label: "Unggah Data", icon: "📁", color: "yellow" },
   { href: "/wizard", label: "Pilih Uji", icon: "🧭", color: "purple" },
   { href: "/assumptions", label: "Cek Asumsi", icon: "✅", color: "green" },

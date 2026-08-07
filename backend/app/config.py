@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     cors_origins: str = "http://localhost:3000"
     session_ttl_minutes: int = 120
+    narrative_ai_daily_limit: int = 30
 
     @property
     def cors_origin_list(self) -> list[str]:

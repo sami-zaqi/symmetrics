@@ -14,6 +14,31 @@ def recommend(answers: WizardAnswers) -> WizardRecommendation:
             reasoning="Anda memilih untuk melihat gambaran umum data tanpa uji hipotesis.",
         )
 
+    if answers.tujuan == "faktor_risiko":
+        return WizardRecommendation(
+            recommended_test="logistic_regression",
+            fallback_test=None,
+            required_variable_roles=[
+                "1 variabel dependen biner (mis. kejadian: Ya/Tidak)",
+                "1 atau lebih variabel independen (prediktor/faktor risiko)",
+            ],
+            reasoning=(
+                "Anda ingin mengetahui faktor-faktor yang berhubungan dengan suatu kejadian biner: "
+                "regresi logistik menghasilkan Odds Ratio per prediktor."
+            ),
+        )
+
+    if answers.tujuan == "evaluasi_diagnostik":
+        return WizardRecommendation(
+            recommended_test="diagnostic_test",
+            fallback_test=None,
+            required_variable_roles=[
+                "1 variabel hasil uji diagnostik (biner)",
+                "1 variabel status penyakit baku emas/gold standard (biner)",
+            ],
+            reasoning="Anda ingin mengevaluasi akurasi alat/metode diagnostik terhadap baku emas.",
+        )
+
     if answers.tujuan == "reliabilitas":
         return WizardRecommendation(
             recommended_test="cronbach_alpha",

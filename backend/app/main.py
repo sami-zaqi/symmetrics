@@ -6,6 +6,7 @@ from app.api import (
     routes_debug,
     routes_export,
     routes_narrative,
+    routes_schema,
     routes_session,
     routes_tests,
     routes_upload,
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(routes_debug.router)
+app.include_router(routes_schema.router)
 app.include_router(routes_upload.router)
 app.include_router(routes_session.router)
 app.include_router(routes_wizard.router)

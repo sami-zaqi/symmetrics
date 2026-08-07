@@ -23,6 +23,10 @@ def _sig(p: float | None) -> str:
     return "signifikan" if p < 0.05 else "tidak signifikan"
 
 
+def _pct(x: float | None) -> str:
+    return "-" if x is None else f"{x * 100:.1f}%"
+
+
 def _assumption_sentence(result: TestResult) -> str:
     a = result.assumptions
     if not a or not a.checked or not a.outcomes:
@@ -137,6 +141,70 @@ def _descriptive(result: TestResult) -> str:
     return f"Analisis statistik deskriptif dilakukan pada variabel: {_group_desc(result)}."
 
 
+def _logistic(result: TestResult) -> str:
+    """OR is always phrased as a multiplicative odds statement ('X kali lebih
+    besar/kecil'), never as a percentage risk increase -- see Rule 7 in
+    prompt_templates.py, which this free/template path independently enforces
+    since it never touches the AI layer at all.
+
+    Labels are always qualified as "variabel = kategori" rather than the bare
+    category alone: a predictor's category can coincide with the outcome's
+    event label (e.g. both being "Ya"), which would otherwise produce an
+    ambiguous or nonsensical sentence ("Ya memiliki peluang ... mengalami Ya")."""
+    stats = result.test_statistics
+    dependent_var = result.variables.get("dependent", "")
+    dep_map = (stats.get("dependent_encoding") or {}).get(dependent_var, {})
+    event_value = dep_map.get("kejadian (1)", "kejadian")
+    event_desc = f"'{dependent_var} = {event_value}'"
+
+    sentences = []
+    for row in result.descriptives:
+        odds_ratio = row.get("odds_ratio")
+        var = row.get("variable")
+        if odds_ratio is None:
+            continue
+        encoding = row.get("encoding")
+        if encoding:
+            group_desc = f"kelompok '{var} = {encoding.get('kejadian (1)', var)}'"
+            ref_desc = f"kelompok '{var} = {encoding.get('referensi (0)', 'referensi')}'"
+        else:
+            group_desc = f"setiap kenaikan 1 satuan '{var}'"
+            ref_desc = "nilai sebelumnya"
+        magnitude = (
+            f"peluang {_n(odds_ratio)} kali lebih besar"
+            if odds_ratio >= 1
+            else f"peluang {_n(1 / odds_ratio) if odds_ratio > 0 else float('nan')} kali lebih kecil"
+        )
+        sentences.append(
+            f"{group_desc} memiliki {magnitude} mengalami {event_desc} dibanding {ref_desc} "
+            f"(OR = {_n(odds_ratio)}; 95% CI: {_n(row.get('ci_lower'))}-{_n(row.get('ci_upper'))}; "
+            f"p {_p(row.get('p_value'))})."
+        )
+
+    model_sentence = (
+        f"Model regresi logistik (n = {stats.get('n')}) secara keseluruhan {_sig(stats.get('llr_p_value'))} "
+        f"(p {_p(stats.get('llr_p_value'))}) dengan pseudo R-squared = {_n(stats.get('pseudo_r2'), 3)}."
+    )
+    return (
+        f"Analisis regresi logistik dilakukan untuk mengetahui faktor-faktor yang berhubungan dengan "
+        f"{event_desc}. {' '.join(sentences)} {model_sentence} Hasil ini bersifat asosiatif, bukan bukti "
+        f"hubungan sebab-akibat."
+    )
+
+
+def _diagnostic(result: TestResult) -> str:
+    stats = result.test_statistics
+    total = (stats.get("tp") or 0) + (stats.get("fp") or 0) + (stats.get("fn") or 0) + (stats.get("tn") or 0)
+    return (
+        f"Uji diagnostik dilakukan dengan membandingkan hasil uji terhadap baku emas (n = {total}). "
+        f"Diperoleh sensitivitas = {_pct(stats.get('sensitivity'))}, spesifisitas = "
+        f"{_pct(stats.get('specificity'))}, nilai duga positif (PPV) = {_pct(stats.get('ppv'))}, nilai duga "
+        f"negatif (NPV) = {_pct(stats.get('npv'))}, dan akurasi keseluruhan = {_pct(stats.get('accuracy'))}. "
+        f"Rasio kemungkinan positif (LR+) = {_n(stats.get('positive_likelihood_ratio'))} dan rasio "
+        f"kemungkinan negatif (LR-) = {_n(stats.get('negative_likelihood_ratio'))}."
+    )
+
+
 BUILDERS = {
     "descriptive_statistics": _descriptive,
     "independent_ttest": lambda r: _two_group_compare(r, "t"),
@@ -150,6 +218,8 @@ BUILDERS = {
     "simple_linear_regression": _regression,
     "chi_square": _chi_square,
     "cronbach_alpha": _cronbach,
+    "logistic_regression": _logistic,
+    "diagnostic_test": _diagnostic,
 }
 
 
