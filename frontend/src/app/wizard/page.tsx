@@ -18,6 +18,8 @@ const NEEDS_XY: TestId[] = [
 const NEEDS_ITEMS: TestId[] = ["cronbach_alpha", "descriptive_statistics"];
 const NEEDS_LOGISTIC: TestId[] = ["logistic_regression"];
 const NEEDS_DIAGNOSTIC: TestId[] = ["diagnostic_test"];
+const NEEDS_ROC: TestId[] = ["roc_analysis"];
+const NEEDS_SURVIVAL: TestId[] = ["survival_analysis"];
 
 export default function WizardPage() {
   const router = useRouter();
@@ -88,6 +90,8 @@ export default function WizardPage() {
               { value: "reliabilitas", label: "Menguji reliabilitas kuesioner" },
               { value: "faktor_risiko", label: "Faktor-faktor yang berhubungan dengan suatu kejadian" },
               { value: "evaluasi_diagnostik", label: "Evaluasi alat/uji diagnostik" },
+              { value: "akurasi_prediksi", label: "Evaluasi kemampuan skor/biomarker memprediksi kejadian (ROC)" },
+              { value: "kelangsungan_hidup", label: "Analisis waktu hingga suatu kejadian (kelangsungan hidup)" },
             ]}
             onChange={(v) => update({ tujuan: v as WizardAnswers["tujuan"] })}
           />
@@ -231,6 +235,44 @@ export default function WizardPage() {
                   options={categoricalCols}
                   value={mapping.dependent ?? ""}
                   onChange={(v) => updateMapping({ dependent: v })}
+                />
+              </>
+            )}
+            {NEEDS_ROC.includes(testId) && (
+              <>
+                <Select
+                  label="Variabel Skor/Prediktor (numerik)"
+                  options={numericCols}
+                  value={mapping.independent ?? ""}
+                  onChange={(v) => updateMapping({ independent: v })}
+                />
+                <Select
+                  label="Variabel Outcome (baku emas, biner)"
+                  options={categoricalCols}
+                  value={mapping.dependent ?? ""}
+                  onChange={(v) => updateMapping({ dependent: v })}
+                />
+              </>
+            )}
+            {NEEDS_SURVIVAL.includes(testId) && (
+              <>
+                <Select
+                  label="Variabel Durasi/Waktu (numerik)"
+                  options={numericCols}
+                  value={mapping.dependent ?? ""}
+                  onChange={(v) => updateMapping({ dependent: v })}
+                />
+                <Select
+                  label="Status Kejadian (biner: kejadian/tersensor)"
+                  options={categoricalCols}
+                  value={mapping.event_col ?? ""}
+                  onChange={(v) => updateMapping({ event_col: v })}
+                />
+                <Select
+                  label="Variabel Kelompok (opsional, untuk uji log-rank)"
+                  options={categoricalCols}
+                  value={mapping.grouping ?? ""}
+                  onChange={(v) => updateMapping({ grouping: v || null })}
                 />
               </>
             )}

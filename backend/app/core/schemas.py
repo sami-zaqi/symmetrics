@@ -20,6 +20,8 @@ TestId = Literal[
     "cronbach_alpha",
     "logistic_regression",
     "diagnostic_test",
+    "roc_analysis",
+    "survival_analysis",
 ]
 
 MethodUsed = Literal["parametric", "nonparametric_fallback", "as_selected"]
@@ -111,6 +113,7 @@ class WizardAnswers(BaseModel):
     tujuan: Literal[
         "deskriptif", "bandingkan", "hubungan", "prediksi", "reliabilitas",
         "faktor_risiko", "evaluasi_diagnostik",
+        "akurasi_prediksi", "kelangsungan_hidup",
     ]
     jumlah_kelompok: Literal["dua", "lebih_dari_dua"] | None = None
     desain: Literal["independen", "berpasangan"] | None = None
@@ -131,6 +134,7 @@ class VariableMapping(BaseModel):
     grouping: str | None = None
     items: list[str] | None = None  # for cronbach_alpha (multiple questionnaire items)
     independents: list[str] | None = None  # for logistic_regression (multiple predictors)
+    event_col: str | None = None  # for survival_analysis (event/censoring indicator)
 
 
 # ---------- Assumptions ----------
@@ -169,7 +173,7 @@ class RunTestRequest(BaseModel):
 
 
 class ChartRef(BaseModel):
-    type: Literal["histogram", "boxplot", "scatter"]
+    type: Literal["histogram", "boxplot", "scatter", "roc_curve", "km_curve"]
     caption_id: str
     image_base64: str
 

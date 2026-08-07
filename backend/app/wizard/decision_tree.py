@@ -39,6 +39,32 @@ def recommend(answers: WizardAnswers) -> WizardRecommendation:
             reasoning="Anda ingin mengevaluasi akurasi alat/metode diagnostik terhadap baku emas.",
         )
 
+    if answers.tujuan == "akurasi_prediksi":
+        return WizardRecommendation(
+            recommended_test="roc_analysis",
+            fallback_test=None,
+            required_variable_roles=[
+                "1 variabel skor/prediktor (numerik, mis. skor risiko atau kadar biomarker)",
+                "1 variabel outcome baku emas (biner)",
+            ],
+            reasoning=(
+                "Anda ingin mengevaluasi seberapa baik suatu skor/nilai kontinu membedakan kejadian "
+                "positif dan negatif: analisis ROC menghasilkan AUC dan titik potong optimal."
+            ),
+        )
+
+    if answers.tujuan == "kelangsungan_hidup":
+        return WizardRecommendation(
+            recommended_test="survival_analysis",
+            fallback_test=None,
+            required_variable_roles=[
+                "1 variabel durasi/waktu (numerik)",
+                "1 variabel status kejadian (biner: kejadian atau tersensor)",
+                "1 variabel kelompok (opsional, biner, untuk uji log-rank)",
+            ],
+            reasoning="Anda ingin menganalisis waktu hingga suatu kejadian terjadi: kurva Kaplan-Meier.",
+        )
+
     if answers.tujuan == "reliabilitas":
         return WizardRecommendation(
             recommended_test="cronbach_alpha",

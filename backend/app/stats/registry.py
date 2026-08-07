@@ -13,6 +13,8 @@ TEST_NAMES_ID: dict[str, str] = {
     "cronbach_alpha": "Uji Reliabilitas (Cronbach's Alpha)",
     "logistic_regression": "Regresi Logistik",
     "diagnostic_test": "Uji Diagnostik (Sensitivitas & Spesifisitas)",
+    "roc_analysis": "Analisis ROC (Kurva ROC & AUC)",
+    "survival_analysis": "Analisis Kelangsungan Hidup (Kaplan-Meier)",
 }
 
 NONPARAMETRIC_FALLBACK: dict[str, str] = {

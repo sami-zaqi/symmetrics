@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException
 
 from app.core.schemas import ChartRef, RunTestRequest, TestResult
 from app.core.session_store import session_store
-from app.stats import anova, chi_square, correlation, descriptive, diagnostic, logistic, regression, reliability, ttest
-from app.stats.charts import boxplot, histogram, scatter
+from app.stats import anova, chi_square, correlation, descriptive, diagnostic, logistic, regression, reliability, roc, survival, ttest
+from app.stats.charts import boxplot, histogram, km_curve_chart, roc_curve_chart, scatter
 from app.stats.registry import TEST_NAMES_ID
 
 router = APIRouter(prefix="/api/tests", tags=["tests"])
@@ -78,6 +78,14 @@ def run_test(req: RunTestRequest):
 
         elif test_id == "diagnostic_test":
             payload = diagnostic.run(df, m.independent, m.dependent)
+
+        elif test_id == "roc_analysis":
+            payload = roc.run(df, m.independent, m.dependent)
+            charts.append(ChartRef(**roc_curve_chart(df, m.independent, m.dependent, "roc_main")))
+
+        elif test_id == "survival_analysis":
+            payload = survival.run(df, m.dependent, m.event_col, m.grouping)
+            charts.append(ChartRef(**km_curve_chart(df, m.dependent, m.event_col, m.grouping, "km_main")))
 
         else:
             raise HTTPException(status_code=400, detail=f"Uji '{test_id}' belum didukung.")

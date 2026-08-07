@@ -2,7 +2,7 @@ import re
 
 CORRELATIONAL_TESTS = {
     "pearson_correlation", "spearman_correlation", "chi_square", "simple_linear_regression",
-    "logistic_regression",
+    "logistic_regression", "roc_analysis",
 }
 
 # Common misinterpretation: describing an Odds Ratio as a percentage risk increase
@@ -12,6 +12,10 @@ CORRELATIONAL_TESTS = {
 OR_PERCENTAGE_PATTERN = re.compile(
     r"(risiko|peluang|kemungkinan)[^.\n]{0,40}\d+(\.\d+)?\s?%", re.IGNORECASE
 )
+
+# Common misinterpretation: calling AUC "accuracy" as a percentage of correct
+# predictions. AUC measures discriminative ability, not prediction accuracy.
+AUC_ACCURACY_PATTERN = re.compile(r"akurasi[^.\n]{0,30}\d+(\.\d+)?\s?%", re.IGNORECASE)
 
 CAUSAL_PATTERNS = [
     (re.compile(r"\bmenyebabkan\b", re.IGNORECASE), "berhubungan dengan"),
@@ -42,6 +46,9 @@ def enforce(narrative_text: str, test_id: str) -> tuple[str, bool]:
                 text = pattern.sub(replacement, text)
 
     if test_id in {"logistic_regression", "chi_square"} and OR_PERCENTAGE_PATTERN.search(text):
+        flagged = True
+
+    if test_id == "roc_analysis" and AUC_ACCURACY_PATTERN.search(text):
         flagged = True
 
     if DISCLAIMER not in text:

@@ -24,6 +24,14 @@ peningkatan risiko (misalnya "meningkatkan risiko sebesar 40%") — itu adalah k
 statistik yang umum terjadi dan harus dihindari. Jika kategori suatu prediktor kebetulan bernama sama \
 dengan kategori kejadian (dependen) — misalnya keduanya "Ya" — SELALU sebutkan nama variabelnya juga \
 (contoh: "kelompok merokok = Ya"), bukan hanya "Ya" saja, supaya kalimat tidak ambigu.
+8. Untuk hasil Analisis ROC, AUC (Area Under Curve) WAJIB diinterpretasikan sebagai kemampuan \
+diskriminasi/pembeda suatu alat/skor, memakai kategori: >= 0.9 "sangat baik", 0.8-0.9 "baik", \
+0.7-0.8 "dapat diterima", 0.5-0.7 "lemah", = 0.5 "setara tebakan acak". DILARANG menuliskan AUC \
+sebagai "akurasi model sebesar X%" -- AUC bukan persentase prediksi benar.
+9. Untuk hasil Analisis Kelangsungan Hidup (Kaplan-Meier), median survival time WAJIB dinarasikan \
+sebagai "waktu saat probabilitas bertahan turun menjadi 50%", BUKAN sebagai jaminan seluruh subjek \
+bertahan hingga waktu tersebut. Jika median survival bernilai null/tidak tersedia dalam data JSON, \
+WAJIB dinyatakan "median belum tercapai (not reached)" -- JANGAN mengarang angka median.
 
 Tulis narasi dalam 2-4 paragraf singkat, bahasa akademik formal, siap ditempel ke Bab IV."""
 

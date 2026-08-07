@@ -205,6 +205,70 @@ def _diagnostic(result: TestResult) -> str:
     )
 
 
+def _roc(result: TestResult) -> str:
+    """AUC is always framed as discriminative ability using the standard
+    bands, never as a raw prediction-accuracy percentage -- see Rule 8 in
+    prompt_templates.py, independently enforced here for the free path."""
+    stats = result.test_statistics
+    score_var = result.variables.get("independent", "")
+    outcome_var = result.variables.get("dependent", "")
+    outcome_map = (stats.get("outcome_encoding") or {}).get(outcome_var, {})
+    event_label = outcome_map.get("kejadian (1)", "kejadian")
+    area = stats.get("auc")
+    ci = stats.get("auc_ci95") or [None, None]
+    return (
+        f"Analisis ROC dilakukan untuk mengevaluasi kemampuan '{score_var}' membedakan kelompok "
+        f"'{outcome_var} = {event_label}' dari kelompok pembanding (n = {stats.get('n_positive')} vs "
+        f"{stats.get('n_negative')}). Diperoleh AUC = {_n(area, 3)} (95% CI: {_n(ci[0])}-{_n(ci[1])}), yang "
+        f"menunjukkan kemampuan diskriminasi tergolong {stats.get('auc_interpretation', '-')}. Titik potong "
+        f"(cut-off) optimal berdasarkan indeks Youden adalah {_n(stats.get('optimal_cutoff'))}, dengan "
+        f"sensitivitas = {_pct(stats.get('sensitivity_at_cutoff'))} dan spesifisitas = "
+        f"{_pct(stats.get('specificity_at_cutoff'))} pada titik potong tersebut. Hasil ini bersifat asosiatif, "
+        f"bukan bukti hubungan sebab-akibat."
+    )
+
+
+def _survival(result: TestResult) -> str:
+    """Median survival is always framed as "the time at which 50% had not yet
+    had the event", and reported as "belum tercapai (not reached)" rather than
+    a fabricated number when the curve never crosses 50% -- see Rule 9."""
+    stats = result.test_statistics
+    duration_var = result.variables.get("dependent", "")
+
+    if "log_rank" in stats:
+        lr = stats["log_rank"]
+        group_var = stats.get("group_variable", "")
+        group_descs = []
+        for row in result.descriptives:
+            med = row.get("median_survival")
+            med_str = f"{_n(med)} {duration_var}" if med is not None else "belum tercapai (not reached)"
+            group_descs.append(
+                f"kelompok '{row.get('kelompok')}' (median survival = {med_str}, n = {row.get('n')}, "
+                f"jumlah kejadian = {row.get('jumlah_kejadian')})"
+            )
+        return (
+            f"Analisis kelangsungan hidup Kaplan-Meier dilakukan pada variabel '{duration_var}', "
+            f"dibandingkan antara {' dan '.join(group_descs)} berdasarkan '{group_var}'. Hasil uji log-rank "
+            f"menunjukkan perbedaan kelangsungan hidup antar kelompok secara statistik {_sig(lr.get('p_value'))} "
+            f"(chi2({lr.get('df')}) = {_n(lr.get('statistic'))}, p {_p(lr.get('p_value'))}). Hasil ini bersifat "
+            f"asosiatif dan perlu ditinjau terhadap desain penelitian sebelum disimpulkan sebagai hubungan "
+            f"sebab-akibat."
+        )
+
+    median = stats.get("median_survival")
+    median_str = (
+        f"{_n(median)} {duration_var}"
+        if median is not None
+        else "belum tercapai (not reached) dalam periode pengamatan"
+    )
+    return (
+        f"Analisis kelangsungan hidup Kaplan-Meier dilakukan pada variabel '{duration_var}' "
+        f"(n = {stats.get('n')}, jumlah kejadian = {stats.get('n_events')}). Median waktu bertahan "
+        f"(median survival time) adalah {median_str} -- yaitu waktu saat probabilitas bertahan turun "
+        f"menjadi 50%."
+    )
+
+
 BUILDERS = {
     "descriptive_statistics": _descriptive,
     "independent_ttest": lambda r: _two_group_compare(r, "t"),
@@ -220,6 +284,8 @@ BUILDERS = {
     "cronbach_alpha": _cronbach,
     "logistic_regression": _logistic,
     "diagnostic_test": _diagnostic,
+    "roc_analysis": _roc,
+    "survival_analysis": _survival,
 }
 
 

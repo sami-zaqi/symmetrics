@@ -62,7 +62,9 @@ export type Tujuan =
   | "prediksi"
   | "reliabilitas"
   | "faktor_risiko"
-  | "evaluasi_diagnostik";
+  | "evaluasi_diagnostik"
+  | "akurasi_prediksi"
+  | "kelangsungan_hidup";
 
 export interface WizardAnswers {
   tujuan: Tujuan;
@@ -86,7 +88,9 @@ export type TestId =
   | "chi_square"
   | "cronbach_alpha"
   | "logistic_regression"
-  | "diagnostic_test";
+  | "diagnostic_test"
+  | "roc_analysis"
+  | "survival_analysis";
 
 export interface WizardRecommendation {
   recommended_test: TestId;
@@ -101,6 +105,7 @@ export interface VariableMapping {
   grouping?: string | null;
   items?: string[] | null;
   independents?: string[] | null;
+  event_col?: string | null;
 }
 
 export interface AssumptionTestOutcome {
@@ -120,7 +125,7 @@ export interface AssumptionResult {
 }
 
 export interface ChartRef {
-  type: "histogram" | "boxplot" | "scatter";
+  type: "histogram" | "boxplot" | "scatter" | "roc_curve" | "km_curve";
   caption_id: string;
   image_base64: string;
 }
