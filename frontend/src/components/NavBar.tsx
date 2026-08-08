@@ -5,6 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
+import { useLanguage } from "@/lib/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n";
 import Logo from "@/components/Logo";
 
 type NavColor = "blue" | "yellow" | "purple" | "green" | "gray";
@@ -17,7 +19,7 @@ const COLOR_STYLES: Record<NavColor, { icon: string; activeBg: string; activeBor
   gray: { icon: "text-duo-gray-soft", activeBg: "bg-slate-100", activeBorder: "border-duo-gray-light", activeText: "text-duo-gray" },
 };
 
-type NavItem = { href: string; label: string; icon: string; color: NavColor };
+type NavItem = { href: string; labelKey: TranslationKey; icon: string; color: NavColor };
 
 // Grouped so the sidebar can visually separate the primary-research flow
 // (upload -> wizard -> results) from the secondary-research tools, without
@@ -25,27 +27,28 @@ type NavItem = { href: string; label: string; icon: string; color: NavColor };
 const NAV_GROUPS: { key: string; groupBg?: string; items: NavItem[] }[] = [
   {
     key: "top",
-    items: [{ href: "/", label: "Beranda", icon: "🏠", color: "blue" }],
+    items: [{ href: "/", labelKey: "nav_beranda", icon: "🏠", color: "blue" }],
   },
   {
     key: "primer",
     groupBg: "bg-duo-green-light",
     items: [
-      { href: "/desain-data", label: "Desain Data", icon: "🧩", color: "yellow" },
-      { href: "/upload", label: "Unggah Data", icon: "📁", color: "yellow" },
-      { href: "/wizard", label: "Pilih Uji", icon: "🧭", color: "purple" },
-      { href: "/assumptions", label: "Cek Asumsi", icon: "✅", color: "green" },
-      { href: "/results", label: "Hasil & Ekspor", icon: "🏆", color: "blue" },
+      { href: "/desain-data", labelKey: "nav_desain_data", icon: "🧩", color: "yellow" },
+      { href: "/upload", labelKey: "nav_upload", icon: "📁", color: "yellow" },
+      { href: "/wizard", labelKey: "nav_wizard", icon: "🧭", color: "purple" },
+      { href: "/assumptions", labelKey: "nav_assumptions", icon: "✅", color: "green" },
+      { href: "/results", labelKey: "nav_results", icon: "🏆", color: "blue" },
+      { href: "/sem-pls", labelKey: "nav_sem_pls", icon: "🧬", color: "purple" },
     ],
   },
   {
     key: "sekunder",
     groupBg: "bg-duo-yellow-light",
-    items: [{ href: "/riset-sekunder", label: "Riset Sekunder", icon: "📚", color: "purple" }],
+    items: [{ href: "/riset-sekunder", labelKey: "nav_riset_sekunder", icon: "📚", color: "purple" }],
   },
   {
     key: "bottom",
-    items: [{ href: "/pengaturan", label: "Pengaturan", icon: "⚙️", color: "gray" }],
+    items: [{ href: "/pengaturan", labelKey: "nav_pengaturan", icon: "⚙️", color: "gray" }],
   },
 ];
 
@@ -53,6 +56,7 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { dataset, reset } = useSession();
+  const { t } = useLanguage();
   const [confirmExit, setConfirmExit] = useState(false);
 
   async function handleExit() {
@@ -73,7 +77,9 @@ export default function NavBar() {
       <div className="mb-3 px-2 py-1">
         <Logo size={30} textClassName="text-xl" />
         {dataset && (
-          <p className="mt-0.5 text-xs font-bold text-duo-gray-soft">{dataset.row_count} baris aktif ⚡</p>
+          <p className="mt-0.5 text-xs font-bold text-duo-gray-soft">
+            {dataset.row_count} {t("nav_rows_active")} ⚡
+          </p>
         )}
       </div>
 
@@ -99,7 +105,7 @@ export default function NavBar() {
                   <span className={`text-xl ${active ? "" : c.icon}`} aria-hidden>
                     {item.icon}
                   </span>
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               );
             })}
@@ -110,19 +116,17 @@ export default function NavBar() {
       <div className="mt-auto pt-3 md:border-t-2 md:border-duo-gray-light">
         {!confirmExit ? (
           <button onClick={() => setConfirmExit(true)} className="btn-duo-red btn-duo-sm w-full">
-            🚪 Keluar
+            🚪 {t("nav_keluar")}
           </button>
         ) : (
           <div className="rounded-2xl border-2 border-duo-red bg-duo-red-light p-3">
-            <p className="mb-2 text-xs font-bold text-duo-red-dark">
-              Hapus data &amp; hasil dari sesi ini?
-            </p>
+            <p className="mb-2 text-xs font-bold text-duo-red-dark">{t("nav_confirm_exit_title")}</p>
             <div className="flex gap-2">
               <button onClick={handleExit} className="btn-duo-red btn-duo-sm flex-1">
-                Ya
+                {t("nav_confirm_yes")}
               </button>
               <button onClick={() => setConfirmExit(false)} className="btn-duo-outline btn-duo-sm flex-1">
-                Batal
+                {t("nav_confirm_cancel")}
               </button>
             </div>
           </div>

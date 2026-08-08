@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/lib/SessionContext";
+import { LanguageProvider } from "@/lib/LanguageContext";
 import NavBar from "@/components/NavBar";
+import Footer from "@/components/Footer";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -19,17 +21,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="id" className={`h-full antialiased ${nunito.variable}`}>
       <body className="min-h-full bg-duo-bg text-duo-gray">
-        <SessionProvider>
-          <div className="flex min-h-screen flex-col md:flex-row">
-            <NavBar />
-            <div className="flex flex-1 flex-col">
-              <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">{children}</main>
-              <footer className="py-4 text-center text-xs font-semibold text-duo-gray-soft">
-                Symmetrics — alat bantu interpretasi statistik, bukan pengganti bimbingan dosen.
-              </footer>
+        <LanguageProvider>
+          <SessionProvider>
+            <div className="flex min-h-screen flex-col md:flex-row">
+              <NavBar />
+              <div className="flex flex-1 flex-col">
+                <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">{children}</main>
+                <Footer />
+              </div>
             </div>
-          </div>
-        </SessionProvider>
+          </SessionProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

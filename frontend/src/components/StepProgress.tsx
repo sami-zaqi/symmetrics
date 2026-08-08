@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n";
 
-const STEPS = [
-  { href: "/upload", label: "Unggah", icon: "📁" },
-  { href: "/wizard", label: "Pilih Uji", icon: "🧭" },
-  { href: "/assumptions", label: "Cek Asumsi", icon: "✅" },
-  { href: "/results", label: "Hasil", icon: "🏆" },
+const STEPS: { href: string; labelKey: TranslationKey; icon: string }[] = [
+  { href: "/upload", labelKey: "step_upload", icon: "📁" },
+  { href: "/wizard", labelKey: "step_wizard", icon: "🧭" },
+  { href: "/assumptions", labelKey: "step_assumptions", icon: "✅" },
+  { href: "/results", labelKey: "step_results", icon: "🏆" },
 ];
 
 export default function StepProgress({ current }: { current: number }) {
+  const { t } = useLanguage();
   return (
     <div className="mb-2 flex items-center">
       {STEPS.map((step, i) => {
@@ -35,7 +38,7 @@ export default function StepProgress({ current }: { current: number }) {
                   active ? "text-duo-blue-dark" : done ? "text-duo-green-dark" : "text-duo-gray-soft"
                 }`}
               >
-                {step.label}
+                {t(step.labelKey)}
               </span>
             </Link>
             {stepNum < STEPS.length && (

@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function PengaturanPage() {
   const router = useRouter();
   const { dataset, narrativeMode, setNarrativeMode, reset } = useSession();
+  const { language, setLanguage, t } = useLanguage();
   const [checking, setChecking] = useState(false);
   const [backendStatus, setBackendStatus] = useState<"unknown" | "ok" | "down">("unknown");
 
@@ -37,19 +39,36 @@ export default function PengaturanPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-black text-duo-gray">⚙️ Pengaturan</h1>
+      <h1 className="text-xl font-black text-duo-gray">⚙️ {t("settings_title")}</h1>
 
       <div className="card-duo">
-        <h2 className="mb-1 text-sm font-black text-duo-gray">✨ Mode Narasi Default</h2>
-        <p className="mb-3 text-xs font-semibold text-duo-gray-soft">
-          Menentukan tombol utama &quot;Buat Narasi&quot; di halaman Hasil pakai sumber apa.
-        </p>
+        <h2 className="mb-1 text-sm font-black text-duo-gray">🌐 {t("settings_language_title")}</h2>
+        <p className="mb-3 text-xs font-semibold text-duo-gray-soft">{t("settings_language_desc")}</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setLanguage("id")}
+            className={language === "id" ? "btn-duo-blue btn-duo-sm" : "btn-duo-outline btn-duo-sm"}
+          >
+            🇮🇩 Bahasa Indonesia
+          </button>
+          <button
+            onClick={() => setLanguage("en")}
+            className={language === "en" ? "btn-duo-blue btn-duo-sm" : "btn-duo-outline btn-duo-sm"}
+          >
+            🇬🇧 English
+          </button>
+        </div>
+      </div>
+
+      <div className="card-duo">
+        <h2 className="mb-1 text-sm font-black text-duo-gray">✨ {t("settings_narrative_mode_title")}</h2>
+        <p className="mb-3 text-xs font-semibold text-duo-gray-soft">{t("settings_narrative_mode_desc")}</p>
         <div className="flex flex-col gap-2">
           {(
             [
-              { value: "auto", label: "🔀 Otomatis", desc: "Coba AI dulu, otomatis pakai Template kalau AI gagal/saldo habis." },
-              { value: "ai", label: "🤖 AI (Claude) saja", desc: "Selalu pakai AI. Butuh saldo Anthropic aktif." },
-              { value: "template", label: "📝 Template saja", desc: "Selalu pakai template gratis, tanpa panggilan AI sama sekali." },
+              { value: "auto", icon: "🔀", labelKey: "settings_narrative_auto", descKey: "settings_narrative_auto_desc" },
+              { value: "ai", icon: "🤖", labelKey: "settings_narrative_ai", descKey: "settings_narrative_ai_desc" },
+              { value: "template", icon: "📝", labelKey: "settings_narrative_template", descKey: "settings_narrative_template_desc" },
             ] as const
           ).map((opt) => (
             <label
@@ -66,8 +85,10 @@ export default function PengaturanPage() {
                 className="mt-1 accent-duo-blue"
               />
               <span>
-                <span className="block font-black text-duo-gray">{opt.label}</span>
-                <span className="block text-xs font-semibold text-duo-gray-soft">{opt.desc}</span>
+                <span className="block font-black text-duo-gray">
+                  {opt.icon} {t(opt.labelKey)}
+                </span>
+                <span className="block text-xs font-semibold text-duo-gray-soft">{t(opt.descKey)}</span>
               </span>
             </label>
           ))}
@@ -75,36 +96,30 @@ export default function PengaturanPage() {
       </div>
 
       <div className="card-duo">
-        <h2 className="mb-2 text-sm font-black text-duo-gray">🔌 Status Backend</h2>
+        <h2 className="mb-2 text-sm font-black text-duo-gray">🔌 {t("settings_backend_status_title")}</h2>
         <div className="flex items-center gap-3">
           <button onClick={checkBackend} disabled={checking} className="btn-duo-outline btn-duo-sm">
-            {checking ? "Memeriksa..." : "Cek Status Server"}
+            {checking ? t("settings_checking") : t("settings_check_backend")}
           </button>
           {backendStatus === "ok" && (
-            <span className="badge-duo bg-duo-green-light text-duo-green-dark">✔ Terhubung</span>
+            <span className="badge-duo bg-duo-green-light text-duo-green-dark">✔ {t("settings_connected")}</span>
           )}
           {backendStatus === "down" && (
-            <span className="badge-duo bg-duo-red-light text-duo-red-dark">✘ Tidak terhubung</span>
+            <span className="badge-duo bg-duo-red-light text-duo-red-dark">✘ {t("settings_disconnected")}</span>
           )}
         </div>
       </div>
 
       <div className="card-duo-blue">
-        <h2 className="mb-2 text-sm font-black text-duo-blue-dark">🔒 Privasi Data</h2>
-        <p className="text-xs font-semibold text-duo-gray leading-relaxed">
-          Data yang kamu unggah hanya disimpan sementara di memori server selama sesi berjalan
-          (tidak ditulis ke database atau disk) dan otomatis terhapus setelah tidak aktif. Kamu
-          juga bisa menghapusnya kapan saja secara manual di bawah ini.
-        </p>
+        <h2 className="mb-2 text-sm font-black text-duo-blue-dark">🔒 {t("settings_privacy_title")}</h2>
+        <p className="text-xs font-semibold text-duo-gray leading-relaxed">{t("settings_privacy_desc")}</p>
       </div>
 
       <div className="card-duo-red">
-        <h2 className="mb-2 text-sm font-black text-duo-red-dark">⚠ Zona Berbahaya</h2>
-        <p className="mb-3 text-xs font-semibold text-duo-gray">
-          Menghapus sesi akan menghilangkan data yang diunggah, hasil uji, dan narasi yang belum diunduh.
-        </p>
+        <h2 className="mb-2 text-sm font-black text-duo-red-dark">⚠ {t("settings_danger_title")}</h2>
+        <p className="mb-3 text-xs font-semibold text-duo-gray">{t("settings_danger_desc")}</p>
         <button onClick={clearSession} className="btn-duo-red">
-          🗑 Hapus Sesi &amp; Mulai Ulang
+          🗑 {t("settings_clear_session")}
         </button>
       </div>
     </div>
