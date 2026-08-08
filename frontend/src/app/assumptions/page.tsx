@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import StepProgress from "@/components/StepProgress";
 
 export default function AssumptionsPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const {
     dataset,
     recommendation,
@@ -29,7 +31,7 @@ export default function AssumptionsPage() {
     api
       .assumptionsCheck(dataset.session_id, activeTestId, mapping)
       .then(setAssumptionResult)
-      .catch((e) => setError(e instanceof Error ? e.message : "Gagal memeriksa asumsi."))
+      .catch((e) => setError(e instanceof Error ? e.message : t("assumptions_error")))
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataset, recommendation, activeTestId]);
@@ -40,11 +42,11 @@ export default function AssumptionsPage() {
         <StepProgress current={3} />
         <div className="card-duo-yellow">
           <p className="font-bold text-duo-gray">
-            Selesaikan langkah{" "}
+            {t("results_no_test_pre")}{" "}
             <a href="/wizard" className="underline text-duo-blue-dark">
-              wizard
+              {t("results_no_test_link")}
             </a>{" "}
-            dulu ya.
+            {t("results_no_test_post")}
           </p>
         </div>
       </div>
@@ -68,18 +70,16 @@ export default function AssumptionsPage() {
   return (
     <div className="flex flex-col gap-6">
       <StepProgress current={3} />
-      <h1 className="text-xl font-black text-duo-gray">✅ Pemeriksaan Asumsi</h1>
+      <h1 className="text-xl font-black text-duo-gray">{t("assumptions_title")}</h1>
 
-      {loading && <p className="text-sm font-bold text-duo-blue-dark">⏳ Memeriksa normalitas &amp; homogenitas data...</p>}
+      {loading && <p className="text-sm font-bold text-duo-blue-dark">{t("assumptions_loading")}</p>}
       {error && <p className="card-duo-red text-sm font-bold text-duo-red-dark">⚠ {error}</p>}
 
       {assumptionResult && !assumptionResult.checked && (
         <div className="card-duo">
-          <p className="text-sm font-semibold text-duo-gray">
-            Uji ini nggak butuh pemeriksaan asumsi normalitas/homogenitas.
-          </p>
+          <p className="text-sm font-semibold text-duo-gray">{t("assumptions_not_needed")}</p>
           <button onClick={keepOriginal} className="btn-duo-green mt-4">
-            Lanjut ke Hasil Uji →
+            {t("assumptions_continue_results")}
           </button>
         </div>
       )}
@@ -90,10 +90,10 @@ export default function AssumptionsPage() {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b-2 border-duo-gray-light">
-                  <th className="px-2 py-1.5 font-black text-duo-gray">Uji</th>
-                  <th className="px-2 py-1.5 font-black text-duo-gray">Statistik</th>
-                  <th className="px-2 py-1.5 font-black text-duo-gray">p-value</th>
-                  <th className="px-2 py-1.5 font-black text-duo-gray">Hasil</th>
+                  <th className="px-2 py-1.5 font-black text-duo-gray">{t("assumptions_table_test")}</th>
+                  <th className="px-2 py-1.5 font-black text-duo-gray">{t("assumptions_table_statistic")}</th>
+                  <th className="px-2 py-1.5 font-black text-duo-gray">{t("assumptions_table_pvalue")}</th>
+                  <th className="px-2 py-1.5 font-black text-duo-gray">{t("assumptions_table_result")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -108,7 +108,7 @@ export default function AssumptionsPage() {
                           o.passed ? "bg-duo-green-light text-duo-green-dark" : "bg-duo-yellow-light text-duo-yellow-dark"
                         }`}
                       >
-                        {o.passed ? "✔ Terpenuhi" : "⚠ Tidak terpenuhi"}
+                        {o.passed ? t("assumptions_passed") : t("assumptions_failed")}
                       </span>
                     </td>
                   </tr>
@@ -122,10 +122,10 @@ export default function AssumptionsPage() {
               <p className="text-sm font-bold text-duo-gray">⚠ {assumptionResult.reason}</p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <button onClick={acceptFallback} className="btn-duo-yellow">
-                  Gunakan {assumptionResult.recommended_test.replaceAll("_", " ")}
+                  {t("assumptions_use_fallback").replace("{test}", assumptionResult.recommended_test.replaceAll("_", " "))}
                 </button>
                 <button onClick={keepOriginal} className="btn-duo-outline">
-                  Tetap Pakai Uji Semula
+                  {t("assumptions_keep_original")}
                 </button>
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function AssumptionsPage() {
             <div className="card-duo-green">
               <p className="text-sm font-bold text-duo-green-dark">✔ {assumptionResult.reason}</p>
               <button onClick={keepOriginal} className="btn-duo-green mt-4">
-                Lanjut ke Hasil Uji →
+                {t("assumptions_continue_results")}
               </button>
             </div>
           )}

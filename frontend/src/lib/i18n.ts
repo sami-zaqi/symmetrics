@@ -50,7 +50,7 @@ const id = {
   settings_title: "Pengaturan",
   settings_language_title: "Bahasa / Language",
   settings_language_desc:
-    "Navigasi & halaman ini sudah mengikuti pilihan bahasa. Konten khusus tiap halaman lain (Unggah, Wizard, Hasil, Riset Sekunder, SEM-PLS) masih dalam Bahasa Indonesia -- terjemahan penuh menyusul.",
+    "Navigasi, Unggah, Wizard, Cek Asumsi, dan Hasil sudah mengikuti pilihan bahasa. Riset Sekunder, SEM-PLS, dan Desain Data masih dalam Bahasa Indonesia -- terjemahan menyusul.",
   settings_narrative_mode_title: "Mode Narasi Default",
   settings_narrative_mode_desc: 'Menentukan tombol utama "Buat Narasi" di halaman Hasil pakai sumber apa.',
   settings_narrative_auto: "Otomatis",
@@ -200,6 +200,20 @@ const id = {
   copy_table_copied: "✔ Tersalin!",
   copy_table_failed: "⚠ Gagal menyalin",
   copy_table_button: "📋 Salin sebagai Tabel (untuk Word)",
+
+  assumptions_title: "✅ Pemeriksaan Asumsi",
+  assumptions_loading: "⏳ Memeriksa normalitas & homogenitas data...",
+  assumptions_error: "Gagal memeriksa asumsi.",
+  assumptions_not_needed: "Uji ini nggak butuh pemeriksaan asumsi normalitas/homogenitas.",
+  assumptions_continue_results: "Lanjut ke Hasil Uji →",
+  assumptions_table_test: "Uji",
+  assumptions_table_statistic: "Statistik",
+  assumptions_table_pvalue: "p-value",
+  assumptions_table_result: "Hasil",
+  assumptions_passed: "✔ Terpenuhi",
+  assumptions_failed: "⚠ Tidak terpenuhi",
+  assumptions_use_fallback: "Gunakan {test}",
+  assumptions_keep_original: "Tetap Pakai Uji Semula",
 } as const;
 
 const en: Record<keyof typeof id, string> = {
@@ -250,7 +264,7 @@ const en: Record<keyof typeof id, string> = {
   settings_title: "Settings",
   settings_language_title: "Bahasa / Language",
   settings_language_desc:
-    "Navigation & this page already follow your language choice. Content specific to other pages (Upload, Wizard, Results, Secondary Research, SEM-PLS) is still Indonesian-only -- full translation is coming.",
+    "Navigation, Upload, Wizard, Check Assumptions, and Results already follow your language choice. Secondary Research, SEM-PLS, and Data Design are still Indonesian-only -- translation is coming.",
   settings_narrative_mode_title: "Default Narrative Mode",
   settings_narrative_mode_desc: 'Determines which source the main "Generate Narrative" button on the Results page uses.',
   settings_narrative_auto: "Automatic",
@@ -400,6 +414,20 @@ const en: Record<keyof typeof id, string> = {
   copy_table_copied: "✔ Copied!",
   copy_table_failed: "⚠ Copy failed",
   copy_table_button: "📋 Copy as Table (for Word)",
+
+  assumptions_title: "✅ Assumption Checks",
+  assumptions_loading: "⏳ Checking normality & homogeneity...",
+  assumptions_error: "Failed to check assumptions.",
+  assumptions_not_needed: "This test doesn't need a normality/homogeneity assumption check.",
+  assumptions_continue_results: "Continue to Test Results →",
+  assumptions_table_test: "Test",
+  assumptions_table_statistic: "Statistic",
+  assumptions_table_pvalue: "p-value",
+  assumptions_table_result: "Result",
+  assumptions_passed: "✔ Passed",
+  assumptions_failed: "⚠ Not passed",
+  assumptions_use_fallback: "Use {test}",
+  assumptions_keep_original: "Keep Original Test",
 };
 
 export const dictionaries = { id, en };
