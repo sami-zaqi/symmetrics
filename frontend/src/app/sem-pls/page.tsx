@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import ConstructBuilder from "@/components/sem-pls/ConstructBuilder";
 import PathBuilder from "@/components/sem-pls/PathBuilder";
 import { DescriptivesTable } from "@/components/ResultTables";
 import type { SemConstruct, SemPath, SemPlsResult } from "@/lib/types";
 
 export default function SemPlsPage() {
+  const { t } = useLanguage();
   const { dataset } = useSession();
   const [constructs, setConstructs] = useState<SemConstruct[]>([]);
   const [paths, setPaths] = useState<SemPath[]>([]);
@@ -25,11 +27,11 @@ export default function SemPlsPage() {
         <h1 className="text-xl font-black text-duo-gray">🧬 SEM-PLS</h1>
         <div className="card-duo-yellow">
           <p className="font-bold text-duo-gray">
-            Belum ada data nih. Yuk{" "}
+            {t("wizard_no_data_pre")}{" "}
             <a href="/upload" className="underline text-duo-blue-dark">
-              unggah data
+              {t("wizard_no_data_link")}
             </a>{" "}
-            dulu sebelum lanjut ke sini.
+            {t("wizard_no_data_post")}
           </p>
         </div>
       </div>
@@ -48,7 +50,7 @@ export default function SemPlsPage() {
       const res = await api.runSemPls(dataset.session_id, constructs, paths);
       setResult(res);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal menjalankan model.");
+      setError(e instanceof Error ? e.message : t("sem_error_run"));
     } finally {
       setRunning(false);
     }
@@ -62,7 +64,7 @@ export default function SemPlsPage() {
       const res = await api.runSemBootstrap(dataset.session_id, result.result_id, bootstrapIterations);
       setResult(res);
     } catch (e) {
-      setBootstrapError(e instanceof Error ? e.message : "Gagal menjalankan bootstrap.");
+      setBootstrapError(e instanceof Error ? e.message : t("sem_error_bootstrap"));
     } finally {
       setBootstrapRunning(false);
     }
@@ -76,27 +78,24 @@ export default function SemPlsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-black text-duo-gray">🧬 SEM-PLS (Structural Equation Modeling)</h1>
-      <p className="-mt-3 text-sm font-semibold text-duo-gray-soft">
-        Untuk model dengan variabel laten (konstruk) dan hubungan mediasi/jalur berganda -- cocok untuk skripsi
-        manajemen, keperawatan, dan ilmu sosial. Setiap konstruk butuh minimal 2 indikator numerik (item kuesioner).
-      </p>
+      <h1 className="text-xl font-black text-duo-gray">{t("sem_title")}</h1>
+      <p className="-mt-3 text-sm font-semibold text-duo-gray-soft">{t("sem_subtitle")}</p>
 
       <div className="card-duo flex flex-col gap-3">
-        <h2 className="text-sm font-black text-duo-gray">1. Definisikan Konstruk</h2>
+        <h2 className="text-sm font-black text-duo-gray">{t("sem_step1_title")}</h2>
         <ConstructBuilder constructs={constructs} numericCols={numericCols} onChange={setConstructs} />
       </div>
 
       {constructNames.length >= 2 && (
         <div className="card-duo flex flex-col gap-3">
-          <h2 className="text-sm font-black text-duo-gray">2. Definisikan Jalur Struktural</h2>
+          <h2 className="text-sm font-black text-duo-gray">{t("sem_step2_title")}</h2>
           <PathBuilder constructNames={constructNames} paths={paths} onChange={setPaths} />
         </div>
       )}
 
       {readyToRun && (
         <button onClick={runModel} disabled={running} className="btn-duo-green w-fit">
-          {running ? "⏳ Menghitung model..." : "▶ Jalankan Model"}
+          {running ? t("sem_running") : t("sem_run_btn")}
         </button>
       )}
       {error && <p className="card-duo-red text-sm font-bold text-duo-red-dark">⚠ {error}</p>}
@@ -105,61 +104,49 @@ export default function SemPlsPage() {
         <div className="flex flex-col gap-5">
           <div className="card-duo-green text-center">
             <span className="text-4xl">🎉</span>
-            <h2 className="mt-1 font-black text-duo-green-dark">Model SEM-PLS Selesai Dihitung</h2>
-            <p className="text-xs font-bold text-duo-gray-soft">n = {result.n} responden</p>
+            <h2 className="mt-1 font-black text-duo-green-dark">{t("sem_done_title")}</h2>
+            <p className="text-xs font-bold text-duo-gray-soft">{t("sem_n_respondents").replace("{n}", String(result.n))}</p>
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-2 text-sm font-black text-duo-gray">📐 Model Pengukuran (Outer Model) -- Loading</h3>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">{t("sem_section_outer_model")}</h3>
             <DescriptivesTable rows={result.loadings} />
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-2 text-sm font-black text-duo-gray">✅ Reliabilitas & Validitas Konvergen</h3>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">{t("sem_section_reliability")}</h3>
             <DescriptivesTable rows={result.reliability} />
-            <p className="mt-2 text-xs font-semibold text-duo-gray-soft">
-              Ambang umum: Cronbach&apos;s Alpha &amp; CR ≥ 0.7, AVE ≥ 0.5.
-            </p>
+            <p className="mt-2 text-xs font-semibold text-duo-gray-soft">{t("sem_reliability_note")}</p>
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-2 text-sm font-black text-duo-gray">🔀 Validitas Diskriminan (Fornell-Larcker)</h3>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">{t("sem_section_discriminant")}</h3>
             <DescriptivesTable rows={result.discriminant_validity} />
-            <p className="mt-2 text-xs font-semibold text-duo-gray-soft">
-              Lolos jika √AVE suatu konstruk lebih besar daripada korelasinya dengan konstruk lain manapun.
-            </p>
+            <p className="mt-2 text-xs font-semibold text-duo-gray-soft">{t("sem_discriminant_note")}</p>
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-2 text-sm font-black text-duo-gray">📈 R-Squared (Model Struktural)</h3>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">{t("sem_section_r2")}</h3>
             <DescriptivesTable rows={result.r_squared} />
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-2 text-sm font-black text-duo-gray">🛤 Koefisien Jalur (Path Coefficients)</h3>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">{t("sem_section_path_coef")}</h3>
             <DescriptivesTable rows={result.path_coefficients} />
-            <p className="mt-2 text-xs font-semibold text-duo-gray-soft">
-              Signifikansi di atas berdasarkan regresi OLS pada skor variabel laten. Untuk signifikansi baku PLS-SEM,
-              jalankan uji bootstrap di bawah.
-            </p>
+            <p className="mt-2 text-xs font-semibold text-duo-gray-soft">{t("sem_path_coef_note")}</p>
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-2 text-sm font-black text-duo-gray">
-              🔗 Efek Langsung, Tidak Langsung, dan Total (Mediasi)
-            </h3>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">{t("sem_section_effects")}</h3>
             <DescriptivesTable rows={result.effects} />
           </div>
 
           <div className="card-duo">
-            <h3 className="mb-2 text-sm font-black text-duo-gray">🎲 Uji Signifikansi Bootstrap</h3>
-            <p className="mb-2 text-xs font-semibold text-duo-gray-soft">
-              Metode signifikansi baku PLS-SEM. Bisa memakan waktu 30 detik hingga beberapa menit tergantung jumlah
-              iterasi -- jangan tutup halaman ini selama proses berjalan.
-            </p>
+            <h3 className="mb-2 text-sm font-black text-duo-gray">{t("sem_section_bootstrap")}</h3>
+            <p className="mb-2 text-xs font-semibold text-duo-gray-soft">{t("sem_bootstrap_note")}</p>
             <div className="mb-3 flex flex-wrap items-end gap-2">
               <label className="flex flex-col gap-1 text-sm">
-                <span className="font-bold text-duo-gray">Jumlah Iterasi Bootstrap</span>
+                <span className="font-bold text-duo-gray">{t("sem_bootstrap_iter_label")}</span>
                 <input
                   type="number"
                   min={100}
@@ -170,7 +157,7 @@ export default function SemPlsPage() {
                 />
               </label>
               <button onClick={runBootstrap} disabled={bootstrapRunning} className="btn-duo-purple">
-                {bootstrapRunning ? "⏳ Menghitung bootstrap (mohon tunggu)..." : "🎲 Jalankan Bootstrap"}
+                {bootstrapRunning ? t("sem_bootstrap_running") : t("sem_bootstrap_run_btn")}
               </button>
             </div>
             {bootstrapError && <p className="text-sm font-bold text-duo-red-dark">⚠ {bootstrapError}</p>}

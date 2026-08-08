@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { downloadSvgAsPng } from "@/lib/exportUtils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface PrismaCounts {
   identifiedDatabase: number;
@@ -66,6 +67,7 @@ function Box({ x, y, w, h, lines }: { x: number; y: number; w: number; h: number
 }
 
 export default function PrismaDiagram() {
+  const { t } = useLanguage();
   const [c, setC] = useState<PrismaCounts>(DEFAULT_COUNTS);
   const svgRef = useRef<SVGSVGElement>(null);
   const [downloadError, setDownloadError] = useState(false);
@@ -110,32 +112,32 @@ export default function PrismaDiagram() {
     <div className="flex flex-col gap-5">
       <div className="grid gap-3 sm:grid-cols-2">
         <NumberField
-          label="Rekaman ditemukan dari basis data"
+          label={t("prisma_field_identified_db")}
           value={c.identifiedDatabase}
           onChange={(v) => update({ identifiedDatabase: v })}
         />
         <NumberField
-          label="Rekaman ditemukan dari sumber lain (registri, sitasi, dll.)"
+          label={t("prisma_field_identified_other")}
           value={c.identifiedOther}
           onChange={(v) => update({ identifiedOther: v })}
         />
         <NumberField
-          label="Duplikat dihapus sebelum skrining"
+          label={t("prisma_field_duplicates")}
           value={c.duplicatesRemoved}
           onChange={(v) => update({ duplicatesRemoved: v })}
         />
         <NumberField
-          label="Dikecualikan saat skrining judul/abstrak"
+          label={t("prisma_field_excluded_screening")}
           value={c.excludedScreening}
           onChange={(v) => update({ excludedScreening: v })}
         />
         <NumberField
-          label="Dikecualikan setelah full-text dinilai"
+          label={t("prisma_field_excluded_fulltext")}
           value={c.excludedFulltext}
           onChange={(v) => update({ excludedFulltext: v })}
         />
         <NumberField
-          label="Dimasukkan ke sintesis kuantitatif (meta-analisis)"
+          label={t("prisma_field_included_quant")}
           value={c.includedQuantitative}
           onChange={(v) => update({ includedQuantitative: v })}
         />
@@ -143,8 +145,7 @@ export default function PrismaDiagram() {
 
       {c.includedQuantitative > includedQualitative && (
         <p className="text-xs font-bold text-duo-red-dark">
-          ⚠ Jumlah sintesis kuantitatif tidak boleh lebih besar dari jumlah studi yang lolos penilaian kelayakan (
-          {includedQualitative}).
+          {t("prisma_warning_quant_exceeds").replace("{n}", String(includedQualitative))}
         </p>
       )}
 
@@ -157,46 +158,43 @@ export default function PrismaDiagram() {
           </defs>
 
           <text x={mainX} y={0} fontSize={12} fontWeight={800} fill="#777777">
-            IDENTIFIKASI
+            {t("prisma_stage_identification")}
           </text>
-          <Box x={mainX} y={rows[0].y} w={mainW} h={rows[0].h} lines={["Total rekaman diidentifikasi", `n = ${totalIdentified}`]} />
+          <Box x={mainX} y={rows[0].y} w={mainW} h={rows[0].h} lines={[t("prisma_box_total_identified"), `n = ${totalIdentified}`]} />
 
           <line x1={mainX + mainW / 2} y1={rows[0].y + rows[0].h} x2={mainX + mainW / 2} y2={rows[1].y} stroke="#777777" strokeWidth={1.5} markerEnd="url(#arrow)" />
           <text x={mainX} y={rows[1].y - 4} fontSize={12} fontWeight={800} fill="#777777">
-            SKRINING
+            {t("prisma_stage_screening")}
           </text>
-          <Box x={mainX} y={rows[1].y} w={mainW} h={rows[1].h} lines={["Rekaman diskrining (judul/abstrak)", `n = ${screened}`]} />
+          <Box x={mainX} y={rows[1].y} w={mainW} h={rows[1].h} lines={[t("prisma_box_screened"), `n = ${screened}`]} />
           <line x1={mainX + mainW} y1={rows[1].y + rows[1].h / 2} x2={sideX} y2={rows[1].y + rows[1].h / 2} stroke="#777777" strokeWidth={1.5} markerEnd="url(#arrow)" />
-          <Box x={sideX} y={rows[1].y} w={sideW} h={rows[1].h} lines={["Dikecualikan (judul/abstrak)", `n = ${c.excludedScreening}`]} />
+          <Box x={sideX} y={rows[1].y} w={sideW} h={rows[1].h} lines={[t("prisma_box_excluded_screening"), `n = ${c.excludedScreening}`]} />
 
           <line x1={mainX + mainW / 2} y1={rows[1].y + rows[1].h} x2={mainX + mainW / 2} y2={rows[2].y} stroke="#777777" strokeWidth={1.5} markerEnd="url(#arrow)" />
           <text x={mainX} y={rows[2].y - 4} fontSize={12} fontWeight={800} fill="#777777">
-            KELAYAKAN
+            {t("prisma_stage_eligibility")}
           </text>
-          <Box x={mainX} y={rows[2].y} w={mainW} h={rows[2].h} lines={["Full-text dinilai kelayakannya", `n = ${fulltextAssessed}`]} />
+          <Box x={mainX} y={rows[2].y} w={mainW} h={rows[2].h} lines={[t("prisma_box_fulltext_assessed"), `n = ${fulltextAssessed}`]} />
           <line x1={mainX + mainW} y1={rows[2].y + rows[2].h / 2} x2={sideX} y2={rows[2].y + rows[2].h / 2} stroke="#777777" strokeWidth={1.5} markerEnd="url(#arrow)" />
-          <Box x={sideX} y={rows[2].y} w={sideW} h={rows[2].h} lines={["Dikecualikan (full-text)", `n = ${c.excludedFulltext}`]} />
+          <Box x={sideX} y={rows[2].y} w={sideW} h={rows[2].h} lines={[t("prisma_box_excluded_fulltext"), `n = ${c.excludedFulltext}`]} />
 
           <line x1={mainX + mainW / 2} y1={rows[2].y + rows[2].h} x2={mainX + mainW / 2} y2={rows[3].y} stroke="#777777" strokeWidth={1.5} markerEnd="url(#arrow)" />
           <text x={mainX} y={rows[3].y - 4} fontSize={12} fontWeight={800} fill="#777777">
-            TERMASUK
+            {t("prisma_stage_included")}
           </text>
-          <Box x={mainX} y={rows[3].y} w={mainW} h={rows[3].h} lines={["Studi termasuk sintesis kualitatif", `n = ${includedQualitative}`]} />
+          <Box x={mainX} y={rows[3].y} w={mainW} h={rows[3].h} lines={[t("prisma_box_included_qual"), `n = ${includedQualitative}`]} />
 
           <line x1={mainX + mainW / 2} y1={rows[3].y + rows[3].h} x2={mainX + mainW / 2} y2={rows[4].y} stroke="#777777" strokeWidth={1.5} markerEnd="url(#arrow)" />
-          <Box x={mainX} y={rows[4].y} w={mainW} h={rows[4].h} lines={["Studi termasuk sintesis kuantitatif (meta-analisis)", `n = ${c.includedQuantitative}`]} />
+          <Box x={mainX} y={rows[4].y} w={mainW} h={rows[4].h} lines={[t("prisma_box_included_quant"), `n = ${c.includedQuantitative}`]} />
         </svg>
       </div>
       <div className="flex items-center gap-2">
         <button onClick={handleDownload} className="btn-duo-outline btn-duo-sm w-fit">
-          ⬇ Unduh Diagram (PNG)
+          {t("prisma_download_btn")}
         </button>
-        {downloadError && <span className="text-xs font-bold text-duo-red-dark">⚠ Gagal mengunduh gambar.</span>}
+        {downloadError && <span className="text-xs font-bold text-duo-red-dark">{t("prisma_download_error")}</span>}
       </div>
-      <p className="text-xs font-semibold text-duo-gray-soft">
-        Diadaptasi dari diagram alur PRISMA 2020. Angka tahap "skrining", "kelayakan", dan "termasuk (kualitatif)"
-        dihitung otomatis dari angka yang Anda masukkan.
-      </p>
+      <p className="text-xs font-semibold text-duo-gray-soft">{t("prisma_footer_note")}</p>
     </div>
   );
 }

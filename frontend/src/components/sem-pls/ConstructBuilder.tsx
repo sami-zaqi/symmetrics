@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/lib/LanguageContext";
 import type { SemConstruct } from "@/lib/types";
 
 export default function ConstructBuilder({
@@ -11,6 +12,7 @@ export default function ConstructBuilder({
   numericCols: string[];
   onChange: (constructs: SemConstruct[]) => void;
 }) {
+  const { t } = useLanguage();
   function addConstruct() {
     onChange([...constructs, { name: `Konstruk${constructs.length + 1}`, indicators: [] }]);
   }
@@ -48,15 +50,15 @@ export default function ConstructBuilder({
               <input
                 value={c.name}
                 onChange={(e) => updateName(i, e.target.value)}
-                placeholder="Nama konstruk, mis. Kepuasan_Kerja"
+                placeholder={t("cb_construct_name_placeholder")}
                 className="input-duo flex-1"
               />
-              <button onClick={() => removeConstruct(i)} className="btn-duo-outline btn-duo-sm" title="Hapus konstruk">
+              <button onClick={() => removeConstruct(i)} className="btn-duo-outline btn-duo-sm" title={t("cb_remove_construct_title")}>
                 🗑
               </button>
             </div>
             <p className="text-xs font-bold text-duo-gray-soft">
-              Indikator (item kuesioner numerik) -- {c.indicators.length} dipilih
+              {t("cb_indicators_label").replace("{n}", String(c.indicators.length))}
             </p>
             <div className="flex flex-wrap gap-2">
               {numericCols.map((col) => {
@@ -67,7 +69,7 @@ export default function ConstructBuilder({
                     key={col}
                     disabled={disabled}
                     onClick={() => toggleIndicator(i, col)}
-                    title={disabled ? "Sudah dipakai konstruk lain" : undefined}
+                    title={disabled ? t("cb_indicator_used_title") : undefined}
                     className={
                       active
                         ? "rounded-xl border-2 border-duo-purple-dark bg-duo-purple px-3 py-1.5 text-xs font-bold text-white"
@@ -83,7 +85,7 @@ export default function ConstructBuilder({
         );
       })}
       <button onClick={addConstruct} className="btn-duo-outline btn-duo-sm w-fit">
-        + Tambah Konstruk
+        {t("cb_add_construct")}
       </button>
     </div>
   );

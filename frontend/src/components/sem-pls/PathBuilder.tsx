@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 import type { SemPath } from "@/lib/types";
 
 export default function PathBuilder({
@@ -12,6 +13,7 @@ export default function PathBuilder({
   paths: SemPath[];
   onChange: (paths: SemPath[]) => void;
 }) {
+  const { t } = useLanguage();
   const [source, setSource] = useState("");
   const [target, setTarget] = useState("");
 
@@ -31,9 +33,9 @@ export default function PathBuilder({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-end gap-2">
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-bold text-duo-gray">Dari Konstruk</span>
+          <span className="font-bold text-duo-gray">{t("pb_from_construct")}</span>
           <select value={source} onChange={(e) => setSource(e.target.value)} className="input-duo">
-            <option value="">-- pilih --</option>
+            <option value="">{t("pb_select_placeholder")}</option>
             {constructNames.map((n) => (
               <option key={n} value={n}>
                 {n}
@@ -43,9 +45,9 @@ export default function PathBuilder({
         </label>
         <span className="pb-2.5 text-lg text-duo-gray-soft">→</span>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-bold text-duo-gray">Ke Konstruk</span>
+          <span className="font-bold text-duo-gray">{t("pb_to_construct")}</span>
           <select value={target} onChange={(e) => setTarget(e.target.value)} className="input-duo">
-            <option value="">-- pilih --</option>
+            <option value="">{t("pb_select_placeholder")}</option>
             {constructNames.map((n) => (
               <option key={n} value={n}>
                 {n}
@@ -54,7 +56,7 @@ export default function PathBuilder({
           </select>
         </label>
         <button onClick={addPath} disabled={!source || !target || source === target} className="btn-duo-outline btn-duo-sm">
-          + Tambah Jalur
+          {t("pb_add_path")}
         </button>
       </div>
 
@@ -70,9 +72,7 @@ export default function PathBuilder({
           ))}
         </div>
       )}
-      <p className="text-xs font-semibold text-duo-gray-soft">
-        Contoh mediasi: X → M lalu M → Y (tanpa X → Y langsung) berarti M memediasi penuh hubungan X dan Y.
-      </p>
+      <p className="text-xs font-semibold text-duo-gray-soft">{t("pb_mediation_example")}</p>
     </div>
   );
 }

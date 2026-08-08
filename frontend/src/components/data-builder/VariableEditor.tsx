@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n";
 import type { CategoryCode, VariableDef, VariableScale } from "@/lib/types";
 
-const SCALE_OPTIONS: { value: VariableScale; label: string; needsCategories: boolean }[] = [
-  { value: "nominal", label: "Nominal — kategori tanpa urutan (mis. jenis kelamin)", needsCategories: true },
-  { value: "ordinal", label: "Ordinal — kategori berurutan (mis. skala Likert 1-5)", needsCategories: true },
-  { value: "interval", label: "Interval — angka, tanpa nol mutlak (mis. suhu °C)", needsCategories: false },
-  { value: "rasio", label: "Rasio — angka, ada nol mutlak (mis. usia, berat badan)", needsCategories: false },
+const SCALE_OPTIONS: { value: VariableScale; labelKey: TranslationKey; needsCategories: boolean }[] = [
+  { value: "nominal", labelKey: "ve_scale_nominal", needsCategories: true },
+  { value: "ordinal", labelKey: "ve_scale_ordinal", needsCategories: true },
+  { value: "interval", labelKey: "ve_scale_interval", needsCategories: false },
+  { value: "rasio", labelKey: "ve_scale_rasio", needsCategories: false },
 ];
 
 export default function VariableEditor({
@@ -17,6 +19,7 @@ export default function VariableEditor({
   variables: VariableDef[];
   onChange: (v: VariableDef[]) => void;
 }) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [label, setLabel] = useState("");
   const [scale, setScale] = useState<VariableScale>("rasio");
@@ -42,15 +45,15 @@ export default function VariableEditor({
     setError(null);
     const trimmedName = name.trim().replace(/\s+/g, "_");
     if (!trimmedName || !label.trim()) {
-      setError("Nama dan label variabel wajib diisi.");
+      setError(t("ve_error_required"));
       return;
     }
     if (variables.some((v) => v.name === trimmedName)) {
-      setError("Nama variabel sudah dipakai, gunakan nama lain.");
+      setError(t("ve_error_duplicate_name"));
       return;
     }
     if (needsCategories && categories.length < 2) {
-      setError("Tambahkan minimal 2 kode kategori untuk skala nominal/ordinal.");
+      setError(t("ve_error_min_categories"));
       return;
     }
     const newVar: VariableDef = {
@@ -87,7 +90,7 @@ export default function VariableEditor({
                 </span>
               </div>
               <button onClick={() => removeVariable(i)} className="text-xs font-bold text-duo-red hover:underline">
-                Hapus
+                {t("ve_remove")}
               </button>
             </div>
           ))}
@@ -95,25 +98,25 @@ export default function VariableEditor({
       )}
 
       <div className="card-duo">
-        <h3 className="mb-3 text-sm font-black text-duo-gray">+ Tambah Variabel</h3>
+        <h3 className="mb-3 text-sm font-black text-duo-gray">{t("ve_add_variable_title")}</h3>
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-sm">
-            <span className="font-bold text-duo-gray">Nama Kolom</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="mis. usia" className="input-duo" />
+            <span className="font-bold text-duo-gray">{t("ve_col_name_label")}</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("ve_col_name_placeholder")} className="input-duo" />
           </label>
           <label className="flex flex-col gap-1 text-sm">
-            <span className="font-bold text-duo-gray">Label</span>
+            <span className="font-bold text-duo-gray">{t("ve_label_label")}</span>
             <input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="mis. Usia Responden (tahun)"
+              placeholder={t("ve_label_placeholder")}
               className="input-duo"
             />
           </label>
         </div>
 
         <div className="mt-3">
-          <p className="mb-1 text-sm font-bold text-duo-gray">Skala Data</p>
+          <p className="mb-1 text-sm font-bold text-duo-gray">{t("ve_scale_title")}</p>
           <div className="flex flex-col gap-1.5">
             {SCALE_OPTIONS.map((opt) => (
               <label
@@ -128,7 +131,7 @@ export default function VariableEditor({
                   onChange={() => setScale(opt.value)}
                   className="mt-0.5 accent-duo-blue"
                 />
-                <span className="font-semibold text-duo-gray">{opt.label}</span>
+                <span className="font-semibold text-duo-gray">{t(opt.labelKey)}</span>
               </label>
             ))}
           </div>
@@ -136,7 +139,7 @@ export default function VariableEditor({
 
         {needsCategories && (
           <div className="mt-3 rounded-2xl bg-duo-yellow-light p-3">
-            <p className="mb-2 text-xs font-black text-duo-gray">Kode Kategori (label + kode angka, bukan diketik manual di data)</p>
+            <p className="mb-2 text-xs font-black text-duo-gray">{t("ve_category_codes_title")}</p>
             <div className="flex flex-wrap gap-2">
               {categories.map((c, i) => (
                 <span key={i} className="badge-duo bg-white text-duo-gray-soft">
@@ -151,18 +154,18 @@ export default function VariableEditor({
               <input
                 value={catLabel}
                 onChange={(e) => setCatLabel(e.target.value)}
-                placeholder="Label, mis. Laki-laki"
+                placeholder={t("ve_category_label_placeholder")}
                 className="input-duo min-w-[140px] flex-1"
               />
               <input
                 value={catValue}
                 onChange={(e) => setCatValue(e.target.value)}
                 type="number"
-                placeholder="Kode"
+                placeholder={t("ve_category_code_placeholder")}
                 className="input-duo w-24"
               />
               <button onClick={addCategory} className="btn-duo-outline btn-duo-sm">
-                + Kode
+                {t("ve_add_code_btn")}
               </button>
             </div>
           </div>
@@ -170,7 +173,7 @@ export default function VariableEditor({
 
         {error && <p className="mt-2 text-xs font-bold text-duo-red-dark">⚠ {error}</p>}
         <button onClick={addVariable} className="btn-duo-green btn-duo-sm mt-3">
-          + Tambah Variabel
+          {t("ve_add_variable_title")}
         </button>
       </div>
     </div>

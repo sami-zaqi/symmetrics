@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { copyHtmlTableToClipboard } from "@/lib/exportUtils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function CopyDataTableButton({ headers, rows }: { headers: string[]; rows: string[][] }) {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState<"idle" | "ok" | "fail">("idle");
 
   async function handleCopy() {
@@ -14,7 +16,7 @@ export default function CopyDataTableButton({ headers, rows }: { headers: string
 
   return (
     <button onClick={handleCopy} className="btn-duo-outline btn-duo-sm w-fit">
-      {copied === "ok" ? "✔ Tersalin!" : copied === "fail" ? "⚠ Gagal menyalin" : "📋 Salin sebagai Tabel (untuk Word)"}
+      {copied === "ok" ? t("copy_table_copied") : copied === "fail" ? t("copy_table_failed") : t("copy_table_button")}
     </button>
   );
 }

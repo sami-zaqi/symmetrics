@@ -10,6 +10,7 @@ import {
   type CellValueChangedEvent,
   type ColDef,
 } from "ag-grid-community";
+import { useLanguage } from "@/lib/LanguageContext";
 import type { VariableDef } from "@/lib/types";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -39,6 +40,7 @@ export default function DataGrid({
   variables: VariableDef[];
   onRowsChange: (rows: GridRow[]) => void;
 }) {
+  const { t } = useLanguage();
   const [rowData, setRowData] = useState<GridRow[]>(() =>
     Array.from({ length: 5 }, () => emptyRow(variables))
   );
@@ -85,10 +87,10 @@ export default function DataGrid({
     <div className="flex flex-col gap-3">
       <div className="flex gap-2">
         <button onClick={() => addRows(1)} className="btn-duo-outline btn-duo-sm">
-          + 1 Baris
+          {t("dg_add_1_row")}
         </button>
         <button onClick={() => addRows(10)} className="btn-duo-outline btn-duo-sm">
-          + 10 Baris
+          {t("dg_add_10_rows")}
         </button>
       </div>
       <div style={{ height: 380, width: "100%" }}>
@@ -101,8 +103,7 @@ export default function DataGrid({
         />
       </div>
       <p className="text-xs font-semibold text-duo-gray-soft">
-        Sel berwarna <span className="cell-invalid rounded px-1 text-duo-red-dark">merah</span> berarti nilai
-        tidak sesuai skala/kode yang sudah didefinisikan. Sel kosong dianggap data hilang, bukan error.
+        {t("dg_legend_pre")} <span className="cell-invalid rounded px-1 text-duo-red-dark">{t("dg_legend_red")}</span> {t("dg_legend_post")}
       </p>
     </div>
   );

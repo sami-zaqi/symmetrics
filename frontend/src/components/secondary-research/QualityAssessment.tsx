@@ -2,46 +2,39 @@
 
 import { useState } from "react";
 import CopyDataTableButton from "@/components/CopyDataTableButton";
+import { useLanguage } from "@/lib/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n";
 
 type ChecklistType = "cross_sectional" | "case_control";
 type Answer = "ya" | "tidak" | "tidak_jelas" | "tidak_berlaku" | "";
 
-const CHECKLISTS: Record<ChecklistType, { label: string; items: string[] }> = {
+const CHECKLISTS: Record<ChecklistType, { labelKey: TranslationKey; itemKeys: TranslationKey[] }> = {
   cross_sectional: {
-    label: "JBI - Studi Cross-Sectional Analitik",
-    items: [
-      "Apakah kriteria inklusi sampel didefinisikan dengan jelas?",
-      "Apakah subjek penelitian dan lokasi penelitian dijelaskan secara rinci?",
-      "Apakah paparan (exposure) diukur dengan cara yang valid dan reliabel?",
-      "Apakah kriteria objektif dan standar digunakan untuk mengukur kondisi/penyakit?",
-      "Apakah faktor perancu (confounding factors) diidentifikasi?",
-      "Apakah strategi untuk mengatasi faktor perancu dinyatakan?",
-      "Apakah outcome diukur dengan cara yang valid dan reliabel?",
-      "Apakah analisis statistik yang digunakan sudah tepat?",
-    ],
+    labelKey: "checklist_cross_sectional_label",
+    itemKeys: ["cs_item_1", "cs_item_2", "cs_item_3", "cs_item_4", "cs_item_5", "cs_item_6", "cs_item_7", "cs_item_8"],
   },
   case_control: {
-    label: "JBI - Studi Case-Control",
-    items: [
-      "Apakah kelompok kasus dan kontrol sebanding, kecuali pada status penyakitnya?",
-      "Apakah kasus dan kontrol dipadankan (matched) secara tepat?",
-      "Apakah kriteria yang sama digunakan untuk mengidentifikasi kasus dan kontrol?",
-      "Apakah paparan diukur dengan cara yang standar, valid, dan reliabel?",
-      "Apakah paparan diukur dengan cara yang sama pada kasus dan kontrol?",
-      "Apakah faktor perancu (confounding factors) diidentifikasi?",
-      "Apakah strategi untuk mengatasi faktor perancu dinyatakan?",
-      "Apakah outcome dinilai dengan cara yang standar, valid, dan reliabel pada kasus dan kontrol?",
-      "Apakah periode paparan yang diteliti cukup panjang untuk bermakna secara klinis?",
-      "Apakah analisis statistik yang digunakan sudah tepat?",
+    labelKey: "checklist_case_control_label",
+    itemKeys: [
+      "cc_item_1",
+      "cc_item_2",
+      "cc_item_3",
+      "cc_item_4",
+      "cc_item_5",
+      "cc_item_6",
+      "cc_item_7",
+      "cc_item_8",
+      "cc_item_9",
+      "cc_item_10",
     ],
   },
 };
 
-const ANSWER_LABEL: Record<Exclude<Answer, "">, string> = {
-  ya: "Ya",
-  tidak: "Tidak",
-  tidak_jelas: "Tidak Jelas",
-  tidak_berlaku: "T/B",
+const ANSWER_LABEL_KEY: Record<Exclude<Answer, "">, TranslationKey> = {
+  ya: "answer_ya",
+  tidak: "answer_tidak",
+  tidak_jelas: "answer_tidak_jelas",
+  tidak_berlaku: "answer_tidak_berlaku",
 };
 
 interface StudyAppraisal {
@@ -56,7 +49,7 @@ function emptyAppraisal(): StudyAppraisal {
     id: crypto.randomUUID(),
     judul: "",
     checklist: "cross_sectional",
-    answers: Array(CHECKLISTS.cross_sectional.items.length).fill(""),
+    answers: Array(CHECKLISTS.cross_sectional.itemKeys.length).fill(""),
   };
 }
 
@@ -68,6 +61,7 @@ function score(a: StudyAppraisal): { ya: number; berlaku: number; belumDijawab: 
 }
 
 export default function QualityAssessment() {
+  const { t } = useLanguage();
   const [studies, setStudies] = useState<StudyAppraisal[]>([emptyAppraisal()]);
 
   function addStudy() {
@@ -81,7 +75,7 @@ export default function QualityAssessment() {
   function setChecklist(id: string, checklist: ChecklistType) {
     setStudies((prev) =>
       prev.map((s) =>
-        s.id === id ? { ...s, checklist, answers: Array(CHECKLISTS[checklist].items.length).fill("") } : s
+        s.id === id ? { ...s, checklist, answers: Array(CHECKLISTS[checklist].itemKeys.length).fill("") } : s
       )
     );
   }
@@ -105,39 +99,40 @@ export default function QualityAssessment() {
     <div className="flex flex-col gap-5">
       {studies.map((s) => {
         const def = CHECKLISTS[s.checklist];
+        const items = def.itemKeys.map((k) => t(k));
         const { ya, berlaku, belumDijawab } = score(s);
         return (
           <div key={s.id} className="card-duo flex flex-col gap-3">
             <div className="flex flex-wrap items-end gap-3">
               <label className="flex flex-1 min-w-[200px] flex-col gap-1 text-sm">
-                <span className="font-bold text-duo-gray">Judul Studi</span>
+                <span className="font-bold text-duo-gray">{t("qa_study_title_label")}</span>
                 <input
                   value={s.judul}
                   onChange={(e) => setJudul(s.id, e.target.value)}
-                  placeholder="Judul studi yang dinilai"
+                  placeholder={t("qa_study_title_placeholder")}
                   className="input-duo"
                 />
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                <span className="font-bold text-duo-gray">Jenis Checklist</span>
+                <span className="font-bold text-duo-gray">{t("qa_checklist_type_label")}</span>
                 <select
                   value={s.checklist}
                   onChange={(e) => setChecklist(s.id, e.target.value as ChecklistType)}
                   className="input-duo"
                 >
-                  <option value="cross_sectional">Cross-Sectional</option>
-                  <option value="case_control">Case-Control</option>
+                  <option value="cross_sectional">{t("qa_checklist_opt_cross_sectional")}</option>
+                  <option value="case_control">{t("qa_checklist_opt_case_control")}</option>
                 </select>
               </label>
-              <button onClick={() => removeStudy(s.id)} className="btn-duo-outline btn-duo-sm" title="Hapus studi">
+              <button onClick={() => removeStudy(s.id)} className="btn-duo-outline btn-duo-sm" title={t("qa_remove_study_title")}>
                 🗑
               </button>
             </div>
 
-            <p className="text-xs font-bold text-duo-gray-soft">{def.label}</p>
+            <p className="text-xs font-bold text-duo-gray-soft">{t(def.labelKey)}</p>
 
             <div className="flex flex-col gap-2">
-              {def.items.map((item, i) => (
+              {items.map((item, i) => (
                 <div key={i} className="flex flex-col gap-1.5 rounded-2xl bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs font-semibold text-duo-gray">
                     {i + 1}. {item}
@@ -153,7 +148,7 @@ export default function QualityAssessment() {
                             : "rounded-xl border-2 border-duo-gray-light bg-white px-2.5 py-1 text-[11px] font-bold text-duo-gray-soft"
                         }
                       >
-                        {ANSWER_LABEL[opt]}
+                        {t(ANSWER_LABEL_KEY[opt])}
                       </button>
                     ))}
                   </div>
@@ -163,36 +158,40 @@ export default function QualityAssessment() {
 
             <div className="flex flex-wrap items-center gap-2">
               <span className="badge-duo w-fit bg-duo-green-light text-duo-green-dark">
-                Skor: {ya} / {berlaku} item terpenuhi (dari yang berlaku)
+                {t("qa_score_badge").replace("{ya}", String(ya)).replace("{berlaku}", String(berlaku))}
               </span>
               {belumDijawab > 0 && (
                 <span className="badge-duo w-fit bg-duo-yellow-light text-duo-yellow-dark">
-                  ⚠ {belumDijawab} item belum dijawab
+                  {t("qa_unanswered_badge").replace("{n}", String(belumDijawab))}
                 </span>
               )}
             </div>
             <CopyDataTableButton
-              headers={["No", "Pertanyaan", "Jawaban"]}
-              rows={def.items.map((item, i) => [String(i + 1), item, s.answers[i] ? ANSWER_LABEL[s.answers[i] as Exclude<Answer, "">] : "(belum dijawab)"])}
+              headers={[t("qa_col_no"), t("qa_col_question"), t("qa_col_answer")]}
+              rows={items.map((item, i) => [
+                String(i + 1),
+                item,
+                s.answers[i] ? t(ANSWER_LABEL_KEY[s.answers[i] as Exclude<Answer, "">]) : t("qa_not_answered_text"),
+              ])}
             />
           </div>
         );
       })}
 
       <button onClick={addStudy} className="btn-duo-outline btn-duo-sm w-fit">
-        + Tambah Studi untuk Dinilai
+        {t("qa_add_study")}
       </button>
 
       {studies.length > 1 && (
         <div className="card-duo">
-          <h3 className="mb-2 text-sm font-black text-duo-gray">Ringkasan Penilaian Kualitas</h3>
+          <h3 className="mb-2 text-sm font-black text-duo-gray">{t("qa_summary_title")}</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b-2 border-duo-gray-light">
-                  <th className="px-2 py-1.5 font-black text-duo-gray">Studi</th>
-                  <th className="px-2 py-1.5 font-black text-duo-gray">Checklist</th>
-                  <th className="px-2 py-1.5 font-black text-duo-gray">Skor</th>
+                  <th className="px-2 py-1.5 font-black text-duo-gray">{t("qa_summary_col_study")}</th>
+                  <th className="px-2 py-1.5 font-black text-duo-gray">{t("qa_summary_col_checklist")}</th>
+                  <th className="px-2 py-1.5 font-black text-duo-gray">{t("qa_summary_col_score")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -200,11 +199,13 @@ export default function QualityAssessment() {
                   const { ya, berlaku, belumDijawab } = score(s);
                   return (
                     <tr key={s.id} className="border-b border-duo-gray-light/50">
-                      <td className="px-2 py-1.5 font-semibold text-duo-gray-soft">{s.judul || "(belum diisi)"}</td>
-                      <td className="px-2 py-1.5 font-semibold text-duo-gray-soft">{CHECKLISTS[s.checklist].label}</td>
+                      <td className="px-2 py-1.5 font-semibold text-duo-gray-soft">{s.judul || t("qa_not_filled")}</td>
+                      <td className="px-2 py-1.5 font-semibold text-duo-gray-soft">{t(CHECKLISTS[s.checklist].labelKey)}</td>
                       <td className="px-2 py-1.5 font-semibold text-duo-gray-soft">
                         {ya} / {berlaku}
-                        {belumDijawab > 0 && <span className="text-duo-yellow-dark"> (⚠ {belumDijawab} belum dijawab)</span>}
+                        {belumDijawab > 0 && (
+                          <span className="text-duo-yellow-dark"> {t("qa_not_answered_paren").replace("{n}", String(belumDijawab))}</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -214,21 +215,21 @@ export default function QualityAssessment() {
           </div>
           <div className="mt-2">
             <CopyDataTableButton
-              headers={["Studi", "Checklist", "Skor"]}
+              headers={[t("qa_summary_col_study"), t("qa_summary_col_checklist"), t("qa_summary_col_score")]}
               rows={studies.map((s) => {
                 const { ya, berlaku, belumDijawab } = score(s);
-                const skorText = belumDijawab > 0 ? `${ya} / ${berlaku} (${belumDijawab} belum dijawab)` : `${ya} / ${berlaku}`;
-                return [s.judul || "(belum diisi)", CHECKLISTS[s.checklist].label, skorText];
+                const skorText =
+                  belumDijawab > 0
+                    ? `${ya} / ${berlaku} ${t("qa_not_answered_paren").replace("{n}", String(belumDijawab))}`
+                    : `${ya} / ${berlaku}`;
+                return [s.judul || t("qa_not_filled"), t(CHECKLISTS[s.checklist].labelKey), skorText];
               })}
             />
           </div>
         </div>
       )}
 
-      <p className="text-xs font-semibold text-duo-gray-soft">
-        Diadaptasi dari JBI Critical Appraisal Checklist (Joanna Briggs Institute). "T/B" = Tidak Berlaku, dikeluarkan
-        dari perhitungan skor.
-      </p>
+      <p className="text-xs font-semibold text-duo-gray-soft">{t("qa_footer_note")}</p>
     </div>
   );
 }

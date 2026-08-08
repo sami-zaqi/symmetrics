@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLanguage } from "@/lib/LanguageContext";
 import type { ConstructDef, VariableDef } from "@/lib/types";
 
 export default function ConstructEditor({
@@ -12,6 +13,7 @@ export default function ConstructEditor({
   constructs: ConstructDef[];
   onChange: (c: ConstructDef[]) => void;
 }) {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -23,11 +25,11 @@ export default function ConstructEditor({
   function addConstruct() {
     setError(null);
     if (!name.trim()) {
-      setError("Nama konstruk wajib diisi.");
+      setError(t("ce_error_name_required"));
       return;
     }
     if (selected.length < 2) {
-      setError("Pilih minimal 2 item untuk membentuk satu konstruk.");
+      setError(t("ce_error_min_items"));
       return;
     }
     onChange([...constructs, { name: name.trim(), items: selected }]);
@@ -40,7 +42,7 @@ export default function ConstructEditor({
   }
 
   if (variables.length === 0) {
-    return <p className="text-sm font-semibold text-duo-gray-soft">Tambahkan variabel dulu di langkah sebelumnya.</p>;
+    return <p className="text-sm font-semibold text-duo-gray-soft">{t("ce_no_variables_msg")}</p>;
   }
 
   return (
@@ -57,7 +59,7 @@ export default function ConstructEditor({
                 <span className="ml-2 text-xs font-semibold text-duo-gray-soft">{c.items.join(", ")}</span>
               </div>
               <button onClick={() => removeConstruct(i)} className="text-xs font-bold text-duo-red hover:underline">
-                Hapus
+                {t("ve_remove")}
               </button>
             </div>
           ))}
@@ -65,18 +67,18 @@ export default function ConstructEditor({
       )}
 
       <div className="card-duo-purple">
-        <h3 className="mb-3 text-sm font-black text-duo-gray">+ Kelompokkan Item Jadi Konstruk</h3>
+        <h3 className="mb-3 text-sm font-black text-duo-gray">{t("ce_title")}</h3>
         <label className="flex flex-col gap-1 text-sm">
-          <span className="font-bold text-duo-gray">Nama Konstruk</span>
+          <span className="font-bold text-duo-gray">{t("ce_name_label")}</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="mis. Kualitas Tidur"
+            placeholder={t("ce_name_placeholder")}
             className="input-duo"
           />
         </label>
 
-        <p className="mt-3 mb-1 text-sm font-bold text-duo-gray">Pilih Item</p>
+        <p className="mt-3 mb-1 text-sm font-bold text-duo-gray">{t("ce_pick_items_label")}</p>
         <div className="flex flex-wrap gap-2">
           {variables.map((v) => (
             <button
@@ -95,7 +97,7 @@ export default function ConstructEditor({
 
         {error && <p className="mt-2 text-xs font-bold text-duo-red-dark">⚠ {error}</p>}
         <button onClick={addConstruct} className="btn-duo-purple btn-duo-sm mt-3">
-          + Buat Konstruk
+          {t("ce_add_construct_btn")}
         </button>
       </div>
     </div>
