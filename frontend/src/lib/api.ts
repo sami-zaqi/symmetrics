@@ -6,6 +6,9 @@ import type {
   DatasetSummary,
   MethodUsed,
   NarrativeResponse,
+  SemConstruct,
+  SemPath,
+  SemPlsResult,
   TestId,
   TestResult,
   ValueCount,
@@ -144,5 +147,19 @@ export const api = {
 
   deleteSession(sessionId: string): Promise<void> {
     return request<void>(`/api/session/${sessionId}`, { method: "DELETE" });
+  },
+
+  runSemPls(sessionId: string, constructs: SemConstruct[], paths: SemPath[]): Promise<SemPlsResult> {
+    return request<SemPlsResult>("/api/sem/run", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId, constructs, paths }),
+    });
+  },
+
+  runSemBootstrap(sessionId: string, resultId: string, iterations = 300): Promise<SemPlsResult> {
+    return request<SemPlsResult>("/api/sem/bootstrap", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId, result_id: resultId, iterations }),
+    });
   },
 };

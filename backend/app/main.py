@@ -7,6 +7,7 @@ from app.api import (
     routes_export,
     routes_narrative,
     routes_schema,
+    routes_sem,
     routes_session,
     routes_tests,
     routes_upload,
@@ -33,6 +34,7 @@ app.include_router(routes_assumptions.router)
 app.include_router(routes_tests.router)
 app.include_router(routes_narrative.router)
 app.include_router(routes_export.router)
+app.include_router(routes_sem.router)
 
 
 @app.get("/api/health")

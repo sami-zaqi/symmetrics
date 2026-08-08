@@ -214,3 +214,45 @@ class ExportRequest(BaseModel):
     session_id: str
     result_id: str
     narrative_text: str | None = None
+
+
+# ---------- SEM-PLS ----------
+# Structural Equation Modeling via Partial Least Squares. This doesn't fit the
+# single-test_id wizard pattern above (a construct/path model, not a "pick 2
+# columns" test), so it gets its own dedicated request/result shape.
+
+class SemConstruct(BaseModel):
+    name: str
+    indicators: list[str]
+
+
+class SemPath(BaseModel):
+    source: str
+    target: str
+
+
+class SemPlsRequest(BaseModel):
+    session_id: str
+    constructs: list[SemConstruct]
+    paths: list[SemPath]
+
+
+class SemPlsResult(BaseModel):
+    result_id: str
+    n: int
+    constructs: list[SemConstruct]
+    paths: list[SemPath]
+    loadings: list[dict[str, Any]]
+    reliability: list[dict[str, Any]]
+    path_coefficients: list[dict[str, Any]]
+    r_squared: list[dict[str, Any]]
+    effects: list[dict[str, Any]]
+    discriminant_validity: list[dict[str, Any]]
+    bootstrap: list[dict[str, Any]] | None = None
+    generated_at: datetime
+
+
+class SemBootstrapRequest(BaseModel):
+    session_id: str
+    result_id: str
+    iterations: int = 300

@@ -152,3 +152,30 @@ export interface NarrativeResponse {
   flagged_causal_language: boolean;
   source: "ai" | "template";
 }
+
+// ---------- SEM-PLS ----------
+
+export interface SemConstruct {
+  name: string;
+  indicators: string[];
+}
+
+export interface SemPath {
+  source: string;
+  target: string;
+}
+
+export interface SemPlsResult {
+  result_id: string;
+  n: number;
+  constructs: SemConstruct[];
+  paths: SemPath[];
+  loadings: Record<string, unknown>[];
+  reliability: Record<string, unknown>[];
+  path_coefficients: Record<string, unknown>[];
+  r_squared: Record<string, unknown>[];
+  effects: Record<string, unknown>[];
+  discriminant_validity: Record<string, unknown>[];
+  bootstrap: Record<string, unknown>[] | null;
+  generated_at: string;
+}

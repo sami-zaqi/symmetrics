@@ -1,0 +1,65 @@
+#!/usr/bin/python3
+#
+# Copyright (C) 2019 Google Inc.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import pandas as pd, numpy as np, math
+from app.vendor.plspm.config import Config
+from app.vendor.plspm.mode import Mode
+
+
+class InnerSummary:
+    """Internal class that computes a summary of the inner model.  Use the methods :meth:`~app.vendor.plspm.Plspm.inner_summary` and :meth:`~app.vendor.plspm.Plspm.goodness_of_fit` defined on :class:`~.app.vendor.plspm.Plspm` to retrieve the inner model characteristics."""
+
+    def __init__(self, config: Config, r_squared: pd.Series, r_squared_adj: pd.Series, outer_model: pd.DataFrame):
+        path = config.path()
+        lv_type = path.sum(axis=1).astype(bool)
+        lv_type.name = "type"
+        lv_type_text = lv_type.replace(False, "Exogenous").replace(True, "Endogenous")
+        block_communality = pd.Series(np.nan, index=path.index, name="block_communality")
+        mean_redundancy = pd.Series(np.nan, index=path.index, name="mean_redundancy")
+        ave = pd.Series(np.nan, index=path.index, name="ave")
+        communality_aux = []
+        num_mvs_in_lv = []
+        for lv in list(config.path()):
+            communality = outer_model.loc[:, "communality"].loc[config.mvs(lv)]
+            block_communality.loc[lv] = communality.mean()
+            mean_redundancy.loc[lv] = outer_model.loc[:, "redundancy"].loc[config.mvs(lv)].mean()
+            if config.mode(lv) == Mode.A:
+                ave_numerator = communality.sum()
+                ave_denominator = ave_numerator + (1 - communality).sum()
+                ave.loc[lv] = ave_numerator / ave_denominator
+            if len(config.mvs(lv)) > 1:
+                num_mvs_in_lv.append(len(config.mvs(lv)))
+                communality_aux.append(block_communality.loc[lv])
+        self.__summary = pd.concat([lv_type_text, r_squared, r_squared_adj, block_communality, mean_redundancy, ave], axis=1,
+                                   sort=True)
+        if sum(num_mvs_in_lv) > 0:
+            mean_communality = sum(x * y for x, y in zip(communality_aux, num_mvs_in_lv)) / sum(num_mvs_in_lv)
+            r_squared_aux = r_squared * lv_type
+            self.__goodness_of_fit = np.sqrt(mean_communality * r_squared_aux[r_squared_aux != 0].mean())
+        else:
+            # All constructs are single-item so we can't calculate goodness-of-fit
+            self.__goodness_of_fit = float("NaN")
+
+    def summary(self) -> pd.DataFrame:
+        """Internal method that returns the summary of the inner model."""
+        return self.__summary
+
+    def goodness_of_fit(self) -> float:
+        """Internal method that returns the goodness-of-fit of the model."""
+        if math.isnan(self.__goodness_of_fit):
+            raise ValueError("Cannot calculate goodness-of-fit if all constructs are single-item.")
+        return self.__goodness_of_fit
