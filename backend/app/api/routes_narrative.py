@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Request
 
 from app.ai import template_narrative
@@ -9,7 +11,8 @@ from app.core.session_store import session_store
 
 router = APIRouter(prefix="/api/narrative", tags=["narrative"])
 
-_ai_rate_limiter = DailyRateLimiter(settings.narrative_ai_daily_limit)
+_RATE_LIMIT_STATE_PATH = Path(__file__).resolve().parent.parent.parent / ".local_state" / "narrative_rate_limit.json"
+_ai_rate_limiter = DailyRateLimiter(settings.narrative_ai_daily_limit, persist_path=_RATE_LIMIT_STATE_PATH)
 
 
 @router.post("/generate", response_model=NarrativeResponse)

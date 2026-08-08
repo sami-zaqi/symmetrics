@@ -45,7 +45,7 @@ class OutlierInfo(BaseModel):
 
 class CleanDataRequest(BaseModel):
     session_id: str
-    strategy: Literal["listwise_deletion", "mean_mode_imputation"]
+    strategy: Literal["listwise_deletion", "mean_mode_imputation", "knn_imputation", "mice_imputation"]
 
 
 class ColumnValuesRequest(BaseModel):

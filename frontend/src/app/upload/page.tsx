@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
 import StepProgress from "@/components/StepProgress";
 import CategoryMapper from "@/components/data-cleaner/CategoryMapper";
-import type { ColumnType } from "@/lib/types";
+import type { CleaningStrategy, ColumnType } from "@/lib/types";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function UploadPage() {
     }
   }
 
-  async function handleClean(strategy: "listwise_deletion" | "mean_mode_imputation") {
+  async function handleClean(strategy: CleaningStrategy) {
     if (!dataset) return;
     setCleaning(true);
     setError(null);
@@ -88,13 +88,13 @@ export default function UploadPage() {
       >
         <span className="mb-2 block text-4xl">{dragOver ? "📂" : "📄"}</span>
         <p className="font-bold text-duo-gray">
-          Seret file CSV/Excel ke sini, atau klik untuk memilih file
+          Seret file CSV/Excel/SPSS ke sini, atau klik untuk memilih file
         </p>
-        <p className="mt-1 text-xs font-semibold text-duo-gray-soft">Format: .csv, .xlsx, .xls</p>
+        <p className="mt-1 text-xs font-semibold text-duo-gray-soft">Format: .csv, .xlsx, .xls, .sav (SPSS)</p>
         <input
           ref={inputRef}
           type="file"
-          accept=".csv,.xlsx,.xls"
+          accept=".csv,.xlsx,.xls,.sav"
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
@@ -215,6 +215,22 @@ export default function UploadPage() {
                 className="btn-duo-outline btn-duo-sm"
               >
                 {cleaning ? "⏳ Memproses..." : "🧮 Isi dengan Rata-rata/Modus"}
+              </button>
+              <button
+                onClick={() => handleClean("knn_imputation")}
+                disabled={cleaning}
+                className="btn-duo-outline btn-duo-sm"
+                title="Isi nilai kosong berdasarkan kemiripan dengan baris data lain -- lebih akurat dari rata-rata untuk data numerik yang saling berhubungan"
+              >
+                {cleaning ? "⏳ Memproses..." : "🎯 Imputasi KNN"}
+              </button>
+              <button
+                onClick={() => handleClean("mice_imputation")}
+                disabled={cleaning}
+                className="btn-duo-outline btn-duo-sm"
+                title="Imputasi berganda (MICE) -- memodelkan hubungan antar variabel numerik, direkomendasikan untuk data penelitian klinis/biostatistika"
+              >
+                {cleaning ? "⏳ Memproses..." : "🧬 Imputasi MICE"}
               </button>
             </div>
           )}

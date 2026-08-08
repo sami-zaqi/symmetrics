@@ -48,7 +48,7 @@ export interface DatasetSummary {
   constructs: ConstructDef[];
 }
 
-export type CleaningStrategy = "listwise_deletion" | "mean_mode_imputation";
+export type CleaningStrategy = "listwise_deletion" | "mean_mode_imputation" | "knn_imputation" | "mice_imputation";
 
 export interface ValueCount {
   value: string;
