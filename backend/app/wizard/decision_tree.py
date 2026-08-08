@@ -89,6 +89,30 @@ def recommend(answers: WizardAnswers) -> WizardRecommendation:
                 required_variable_roles=["1 variabel kategorik", "1 variabel kategorik"],
                 reasoning="Kedua variabel bertipe kategorik, uji hubungan yang tepat adalah Chi-Square.",
             )
+        if answers.tipe_variabel_hubungan == "campuran":
+            # One numeric + one categorical variable: statistically this reduces to
+            # comparing the numeric variable's mean across the categorical variable's
+            # groups -- the same test family as "bandingkan", not a correlation test
+            # (Pearson/Spearman require both variables numeric).
+            if answers.jumlah_kelompok == "lebih_dari_dua":
+                return WizardRecommendation(
+                    recommended_test="oneway_anova",
+                    fallback_test=NONPARAMETRIC_FALLBACK["oneway_anova"],
+                    required_variable_roles=["1 variabel numerik", "1 variabel kategorik (>2 kelompok)"],
+                    reasoning=(
+                        "Satu variabel numerik dan satu kategorik (>2 kelompok): hubungan antara keduanya "
+                        "diuji dengan membandingkan rata-rata numerik antar kelompok (ANOVA satu arah)."
+                    ),
+                )
+            return WizardRecommendation(
+                recommended_test="independent_ttest",
+                fallback_test=NONPARAMETRIC_FALLBACK["independent_ttest"],
+                required_variable_roles=["1 variabel numerik", "1 variabel kategorik (2 kelompok)"],
+                reasoning=(
+                    "Satu variabel numerik dan satu kategorik (2 kelompok): hubungan antara keduanya diuji "
+                    "dengan membandingkan rata-rata numerik antar kelompok (uji T tidak berpasangan)."
+                ),
+            )
         return WizardRecommendation(
             recommended_test="pearson_correlation",
             fallback_test="spearman_correlation",

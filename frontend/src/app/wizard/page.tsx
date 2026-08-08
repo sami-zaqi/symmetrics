@@ -127,8 +127,21 @@ export default function WizardPage() {
               options={[
                 { value: "keduanya_numerik", label: "Keduanya numerik" },
                 { value: "keduanya_kategorik", label: "Keduanya kategorik" },
+                { value: "campuran", label: "Campuran (1 numerik, 1 kategorik)" },
               ]}
               onChange={(v) => update({ tipe_variabel_hubungan: v as WizardAnswers["tipe_variabel_hubungan"] })}
+            />
+          )}
+
+          {answers.tujuan === "hubungan" && answers.tipe_variabel_hubungan === "campuran" && (
+            <Question
+              label="Berapa kelompok pada variabel kategoriknya?"
+              value={answers.jumlah_kelompok}
+              options={[
+                { value: "dua", label: "2 kelompok" },
+                { value: "lebih_dari_dua", label: "Lebih dari 2 kelompok" },
+              ]}
+              onChange={(v) => update({ jumlah_kelompok: v as WizardAnswers["jumlah_kelompok"] })}
             />
           )}
 
@@ -298,7 +311,10 @@ function isReady(a: Partial<WizardAnswers>): boolean {
     if (!a.jumlah_kelompok) return false;
     if (a.jumlah_kelompok === "dua" && !a.desain) return false;
   }
-  if (a.tujuan === "hubungan" && !a.tipe_variabel_hubungan) return false;
+  if (a.tujuan === "hubungan") {
+    if (!a.tipe_variabel_hubungan) return false;
+    if (a.tipe_variabel_hubungan === "campuran" && !a.jumlah_kelompok) return false;
+  }
   return true;
 }
 
