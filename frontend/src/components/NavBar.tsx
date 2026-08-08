@@ -17,14 +17,36 @@ const COLOR_STYLES: Record<NavColor, { icon: string; activeBg: string; activeBor
   gray: { icon: "text-duo-gray-soft", activeBg: "bg-slate-100", activeBorder: "border-duo-gray-light", activeText: "text-duo-gray" },
 };
 
-const NAV_ITEMS: { href: string; label: string; icon: string; color: NavColor }[] = [
-  { href: "/", label: "Beranda", icon: "🏠", color: "blue" },
-  { href: "/desain-data", label: "Desain Data", icon: "🧩", color: "yellow" },
-  { href: "/upload", label: "Unggah Data", icon: "📁", color: "yellow" },
-  { href: "/wizard", label: "Pilih Uji", icon: "🧭", color: "purple" },
-  { href: "/assumptions", label: "Cek Asumsi", icon: "✅", color: "green" },
-  { href: "/results", label: "Hasil & Ekspor", icon: "🏆", color: "blue" },
-  { href: "/pengaturan", label: "Pengaturan", icon: "⚙️", color: "gray" },
+type NavItem = { href: string; label: string; icon: string; color: NavColor };
+
+// Grouped so the sidebar can visually separate the primary-research flow
+// (upload -> wizard -> results) from the secondary-research tools, without
+// changing each item's own icon/text/active color.
+const NAV_GROUPS: { key: string; groupBg?: string; items: NavItem[] }[] = [
+  {
+    key: "top",
+    items: [{ href: "/", label: "Beranda", icon: "🏠", color: "blue" }],
+  },
+  {
+    key: "primer",
+    groupBg: "bg-duo-green-light",
+    items: [
+      { href: "/desain-data", label: "Desain Data", icon: "🧩", color: "yellow" },
+      { href: "/upload", label: "Unggah Data", icon: "📁", color: "yellow" },
+      { href: "/wizard", label: "Pilih Uji", icon: "🧭", color: "purple" },
+      { href: "/assumptions", label: "Cek Asumsi", icon: "✅", color: "green" },
+      { href: "/results", label: "Hasil & Ekspor", icon: "🏆", color: "blue" },
+    ],
+  },
+  {
+    key: "sekunder",
+    groupBg: "bg-duo-yellow-light",
+    items: [{ href: "/riset-sekunder", label: "Riset Sekunder", icon: "📚", color: "purple" }],
+  },
+  {
+    key: "bottom",
+    items: [{ href: "/pengaturan", label: "Pengaturan", icon: "⚙️", color: "gray" }],
+  },
 ];
 
 export default function NavBar() {
@@ -56,24 +78,33 @@ export default function NavBar() {
       </div>
 
       <div className="flex flex-row flex-wrap gap-1.5 md:flex-col">
-        {NAV_ITEMS.map((item) => {
-          const active = pathname === item.href;
-          const c = COLOR_STYLES[item.color];
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-extrabold tracking-tight transition-all ${
-                active ? `border-2 ${c.activeBorder} ${c.activeBg} ${c.activeText}` : "text-duo-gray-soft hover:bg-slate-50"
-              }`}
-            >
-              <span className={`text-xl ${active ? "" : c.icon}`} aria-hidden>
-                {item.icon}
-              </span>
-              {item.label}
-            </Link>
-          );
-        })}
+        {NAV_GROUPS.map((group) => (
+          <div
+            key={group.key}
+            className={`flex flex-row flex-wrap gap-1.5 md:flex-col ${
+              group.groupBg ? `rounded-2xl p-1.5 ${group.groupBg}` : ""
+            }`}
+          >
+            {group.items.map((item) => {
+              const active = pathname === item.href;
+              const c = COLOR_STYLES[item.color];
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] font-extrabold tracking-tight transition-all ${
+                    active ? `border-2 ${c.activeBorder} ${c.activeBg} ${c.activeText}` : "text-duo-gray-soft hover:bg-slate-50"
+                  }`}
+                >
+                  <span className={`text-xl ${active ? "" : c.icon}`} aria-hidden>
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       <div className="mt-auto pt-3 md:border-t-2 md:border-duo-gray-light">
