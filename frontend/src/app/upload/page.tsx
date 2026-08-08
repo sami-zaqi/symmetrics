@@ -4,12 +4,14 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import StepProgress from "@/components/StepProgress";
 import CategoryMapper from "@/components/data-cleaner/CategoryMapper";
 import type { CleaningStrategy, ColumnType } from "@/lib/types";
 
 export default function UploadPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { dataset, setDataset, reset } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export default function UploadPage() {
       const summary = await api.upload(file);
       setDataset(summary);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal mengunggah file.");
+      setError(e instanceof Error ? e.message : t("upload_error_file"));
     } finally {
       setLoading(false);
     }
@@ -41,7 +43,7 @@ export default function UploadPage() {
       const summary = await api.cleanData(dataset.session_id, strategy);
       setDataset(summary);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal membersihkan data.");
+      setError(e instanceof Error ? e.message : t("upload_error_clean"));
     } finally {
       setCleaning(false);
     }
@@ -55,7 +57,7 @@ export default function UploadPage() {
       const summary = await api.setColumnType(dataset.session_id, column, dtype);
       setDataset(summary);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal mengubah tipe kolom.");
+      setError(e instanceof Error ? e.message : t("upload_error_type"));
     } finally {
       setChangingType(null);
     }
@@ -68,7 +70,7 @@ export default function UploadPage() {
   return (
     <div className="flex flex-col gap-6">
       <StepProgress current={1} />
-      <h1 className="text-xl font-black text-duo-gray">📁 Unggah Data Kamu</h1>
+      <h1 className="text-xl font-black text-duo-gray">{t("upload_title")}</h1>
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -87,10 +89,8 @@ export default function UploadPage() {
         }`}
       >
         <span className="mb-2 block text-4xl">{dragOver ? "📂" : "📄"}</span>
-        <p className="font-bold text-duo-gray">
-          Seret file CSV/Excel/SPSS ke sini, atau klik untuk memilih file
-        </p>
-        <p className="mt-1 text-xs font-semibold text-duo-gray-soft">Format: .csv, .xlsx, .xls, .sav (SPSS)</p>
+        <p className="font-bold text-duo-gray">{t("upload_dropzone_text")}</p>
+        <p className="mt-1 text-xs font-semibold text-duo-gray-soft">{t("upload_dropzone_format")}</p>
         <input
           ref={inputRef}
           type="file"
@@ -103,13 +103,13 @@ export default function UploadPage() {
         />
       </div>
 
-      {loading && <p className="text-sm font-bold text-duo-blue-dark">⏳ Mengunggah dan membaca data...</p>}
+      {loading && <p className="text-sm font-bold text-duo-blue-dark">{t("upload_loading")}</p>}
       {error && <p className="card-duo-red text-sm font-bold text-duo-red-dark">⚠ {error}</p>}
 
       {dataset && (
         <div className="card-duo-green">
           <p className="mb-2 text-sm font-bold text-duo-green-dark">
-            ✔ Berhasil! {dataset.row_count} baris, {dataset.columns.length} kolom
+            {t("upload_success").replace("{rows}", String(dataset.row_count)).replace("{cols}", String(dataset.columns.length))}
           </p>
           <div className="overflow-x-auto rounded-2xl border-2 border-duo-gray-light bg-white">
             <table className="w-full text-left text-xs">
@@ -141,11 +141,8 @@ export default function UploadPage() {
 
       {dataset && (
         <div className="card-duo">
-          <h3 className="mb-1 text-sm font-black text-duo-gray">🔍 Tinjau Tipe Kolom &amp; Kategori</h3>
-          <p className="mb-3 text-xs font-semibold text-duo-gray-soft">
-            Cek apakah tipe tiap kolom sudah benar sebelum lanjut analisis. Untuk kolom kategorik, tinjau juga
-            nilai uniknya siapa tahu ada label yang tidak konsisten.
-          </p>
+          <h3 className="mb-1 text-sm font-black text-duo-gray">{t("upload_review_title")}</h3>
+          <p className="mb-3 text-xs font-semibold text-duo-gray-soft">{t("upload_review_desc")}</p>
           <div className="flex flex-col gap-2">
             {dataset.columns.map((c) => (
               <div key={c.name} className="rounded-2xl border-2 border-duo-gray-light bg-white p-3">
@@ -167,7 +164,7 @@ export default function UploadPage() {
                         onClick={() => setReviewColumn(reviewColumn === c.name ? null : c.name)}
                         className="btn-duo-outline btn-duo-sm"
                       >
-                        {reviewColumn === c.name ? "Sembunyikan" : `🔎 Nilai Unik (${c.unique_count})`}
+                        {reviewColumn === c.name ? t("upload_hide") : t("upload_unique_values").replace("{n}", String(c.unique_count))}
                       </button>
                     )}
                   </div>
@@ -188,16 +185,21 @@ export default function UploadPage() {
 
       {dataset && (hasMissing || hasOutliers) && (
         <div className="card-duo-yellow">
-          <h3 className="mb-2 text-sm font-black text-duo-gray">⚠ Kualitas Data Perlu Diperhatikan</h3>
+          <h3 className="mb-2 text-sm font-black text-duo-gray">{t("upload_quality_title")}</h3>
           {hasMissing && (
             <p className="text-xs font-semibold text-duo-gray">
-              Data kosong ditemukan di: {missingColumns.map((c) => `${c.name} (${c.missing_count} sel)`).join(", ")}.
+              {t("upload_missing_found").replace(
+                "{list}",
+                missingColumns.map((c) => `${c.name} (${c.missing_count} sel)`).join(", ")
+              )}
             </p>
           )}
           {hasOutliers && (
             <p className="mt-1 text-xs font-semibold text-duo-gray">
-              Kemungkinan outlier (metode IQR) di: {dataset!.outliers.map((o) => `${o.column} (${o.count} nilai)`).join(", ")}.
-              {" "}Ini hanya informasi — tidak dihapus otomatis, silakan tinjau sendiri kewajarannya.
+              {t("upload_outliers_found").replace(
+                "{list}",
+                dataset!.outliers.map((o) => `${o.column} (${o.count} nilai)`).join(", ")
+              )}
             </p>
           )}
           {hasMissing && (
@@ -207,30 +209,30 @@ export default function UploadPage() {
                 disabled={cleaning}
                 className="btn-duo-yellow btn-duo-sm"
               >
-                {cleaning ? "⏳ Memproses..." : "🗑 Hapus Baris Kosong"}
+                {cleaning ? t("upload_processing") : t("upload_btn_delete_missing")}
               </button>
               <button
                 onClick={() => handleClean("mean_mode_imputation")}
                 disabled={cleaning}
                 className="btn-duo-outline btn-duo-sm"
               >
-                {cleaning ? "⏳ Memproses..." : "🧮 Isi dengan Rata-rata/Modus"}
+                {cleaning ? t("upload_processing") : t("upload_btn_mean_mode")}
               </button>
               <button
                 onClick={() => handleClean("knn_imputation")}
                 disabled={cleaning}
                 className="btn-duo-outline btn-duo-sm"
-                title="Isi nilai kosong berdasarkan kemiripan dengan baris data lain -- lebih akurat dari rata-rata untuk data numerik yang saling berhubungan"
+                title={t("upload_btn_knn_title")}
               >
-                {cleaning ? "⏳ Memproses..." : "🎯 Imputasi KNN"}
+                {cleaning ? t("upload_processing") : t("upload_btn_knn")}
               </button>
               <button
                 onClick={() => handleClean("mice_imputation")}
                 disabled={cleaning}
                 className="btn-duo-outline btn-duo-sm"
-                title="Imputasi berganda (MICE) -- memodelkan hubungan antar variabel numerik, direkomendasikan untuk data penelitian klinis/biostatistika"
+                title={t("upload_btn_mice_title")}
               >
-                {cleaning ? "⏳ Memproses..." : "🧬 Imputasi MICE"}
+                {cleaning ? t("upload_processing") : t("upload_btn_mice")}
               </button>
             </div>
           )}
@@ -239,7 +241,7 @@ export default function UploadPage() {
 
       {dataset && (
         <button onClick={() => router.push("/wizard")} className="btn-duo-green w-fit">
-          ✔ Data Sudah Oke, Lanjut ke Pemilihan Uji →
+          {t("upload_continue")}
         </button>
       )}
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { useLanguage } from "@/lib/LanguageContext";
 import type { DatasetSummary, ValueCount } from "@/lib/types";
 
 export default function CategoryMapper({
@@ -15,6 +16,7 @@ export default function CategoryMapper({
   onClose: () => void;
   onRemapped: (summary: DatasetSummary) => void;
 }) {
+  const { t } = useLanguage();
   const [values, setValues] = useState<ValueCount[] | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [target, setTarget] = useState("");
@@ -35,7 +37,7 @@ export default function CategoryMapper({
       setSelected([]);
       setTarget("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal memuat nilai unik.");
+      setError(e instanceof Error ? e.message : t("cm_error_load"));
     } finally {
       setLoading(false);
     }
@@ -47,7 +49,7 @@ export default function CategoryMapper({
 
   async function applyMerge() {
     if (selected.length < 2 || !target.trim()) {
-      setError("Pilih minimal 2 nilai yang mau digabung, dan isi nama hasil gabungannya.");
+      setError(t("cm_error_min_select"));
       return;
     }
     setError(null);
@@ -59,7 +61,7 @@ export default function CategoryMapper({
       onRemapped(summary);
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal menggabungkan nilai.");
+      setError(e instanceof Error ? e.message : t("cm_error_merge"));
     } finally {
       setLoading(false);
     }
@@ -68,16 +70,14 @@ export default function CategoryMapper({
   return (
     <div className="card-duo-yellow mt-2">
       <div className="mb-2 flex items-center justify-between">
-        <h4 className="text-sm font-black text-duo-gray">🔍 Nilai Unik: {column}</h4>
+        <h4 className="text-sm font-black text-duo-gray">{t("cm_title").replace("{column}", column)}</h4>
         <button onClick={onClose} className="text-xs font-bold text-duo-gray-soft hover:underline">
-          Tutup
+          {t("cm_close")}
         </button>
       </div>
-      <p className="mb-2 text-xs font-semibold text-duo-gray">
-        Kalau ada label yang seharusnya sama tapi tertulis beda (mis. &quot;L&quot;, &quot;laki2&quot;, &quot;Laki-laki&quot;), pilih semuanya lalu gabungkan jadi satu.
-      </p>
+      <p className="mb-2 text-xs font-semibold text-duo-gray">{t("cm_hint")}</p>
 
-      {loading && !values && <p className="text-xs font-semibold text-duo-gray-soft">Memuat...</p>}
+      {loading && !values && <p className="text-xs font-semibold text-duo-gray-soft">{t("cm_loading")}</p>}
       {error && <p className="mb-2 text-xs font-bold text-duo-red-dark">⚠ {error}</p>}
 
       {values && (
@@ -100,15 +100,15 @@ export default function CategoryMapper({
 
           {values.length > 1 && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-duo-gray">Gabungkan yang dipilih jadi:</span>
+              <span className="text-xs font-bold text-duo-gray">{t("cm_merge_label")}</span>
               <input
                 value={target}
                 onChange={(e) => setTarget(e.target.value)}
-                placeholder="mis. Laki-laki"
+                placeholder={t("cm_merge_placeholder")}
                 className="input-duo w-40"
               />
               <button onClick={applyMerge} disabled={loading} className="btn-duo-outline btn-duo-sm">
-                {loading ? "⏳..." : "Gabungkan"}
+                {loading ? t("cm_merge_loading") : t("cm_merge_button")}
               </button>
             </div>
           )}

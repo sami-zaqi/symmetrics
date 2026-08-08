@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import StepProgress from "@/components/StepProgress";
 import type { TestId, VariableMapping, WizardAnswers } from "@/lib/types";
 
@@ -23,6 +24,7 @@ const NEEDS_SURVIVAL: TestId[] = ["survival_analysis"];
 
 export default function WizardPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const { dataset, recommendation, setRecommendation, setWizardAnswers, mapping, setMapping, setActiveTestId } =
     useSession();
   const [answers, setAnswers] = useState<Partial<WizardAnswers>>({});
@@ -34,11 +36,11 @@ export default function WizardPage() {
         <StepProgress current={2} />
         <div className="card-duo-yellow">
           <p className="font-bold text-duo-gray">
-            Belum ada data nih. Yuk{" "}
+            {t("wizard_no_data_pre")}{" "}
             <a href="/upload" className="underline text-duo-blue-dark">
-              unggah data
+              {t("wizard_no_data_link")}
             </a>{" "}
-            dulu sebelum lanjut ke sini.
+            {t("wizard_no_data_post")}
           </p>
         </div>
       </div>
@@ -58,7 +60,7 @@ export default function WizardPage() {
       setActiveTestId(rec.recommended_test);
       setMapping({});
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Gagal memuat rekomendasi.");
+      setError(e instanceof Error ? e.message : t("wizard_error_recommend"));
     }
   }
 
@@ -75,34 +77,34 @@ export default function WizardPage() {
   return (
     <div className="flex flex-col gap-6">
       <StepProgress current={2} />
-      <h1 className="text-xl font-black text-duo-gray">🧭 Pilih Uji yang Tepat</h1>
+      <h1 className="text-xl font-black text-duo-gray">{t("wizard_title")}</h1>
 
       {!recommendation && (
         <div className="card-duo flex flex-col gap-5">
           <Question
-            label="Apa tujuan analisis kamu?"
+            label={t("wizard_q_tujuan")}
             value={answers.tujuan}
             options={[
-              { value: "deskriptif", label: "Deskriptif saja" },
-              { value: "bandingkan", label: "Membandingkan kelompok" },
-              { value: "hubungan", label: "Melihat hubungan antar variabel" },
-              { value: "prediksi", label: "Memprediksi nilai" },
-              { value: "reliabilitas", label: "Menguji reliabilitas kuesioner" },
-              { value: "faktor_risiko", label: "Faktor-faktor yang berhubungan dengan suatu kejadian" },
-              { value: "evaluasi_diagnostik", label: "Evaluasi alat/uji diagnostik" },
-              { value: "akurasi_prediksi", label: "Evaluasi kemampuan skor/biomarker memprediksi kejadian (ROC)" },
-              { value: "kelangsungan_hidup", label: "Analisis waktu hingga suatu kejadian (kelangsungan hidup)" },
+              { value: "deskriptif", label: t("wizard_opt_deskriptif") },
+              { value: "bandingkan", label: t("wizard_opt_bandingkan") },
+              { value: "hubungan", label: t("wizard_opt_hubungan") },
+              { value: "prediksi", label: t("wizard_opt_prediksi") },
+              { value: "reliabilitas", label: t("wizard_opt_reliabilitas") },
+              { value: "faktor_risiko", label: t("wizard_opt_faktor_risiko") },
+              { value: "evaluasi_diagnostik", label: t("wizard_opt_evaluasi_diagnostik") },
+              { value: "akurasi_prediksi", label: t("wizard_opt_akurasi_prediksi") },
+              { value: "kelangsungan_hidup", label: t("wizard_opt_kelangsungan_hidup") },
             ]}
             onChange={(v) => update({ tujuan: v as WizardAnswers["tujuan"] })}
           />
 
           {answers.tujuan === "bandingkan" && (
             <Question
-              label="Berapa kelompok yang dibandingkan?"
+              label={t("wizard_q_jumlah_kelompok")}
               value={answers.jumlah_kelompok}
               options={[
-                { value: "dua", label: "2 kelompok" },
-                { value: "lebih_dari_dua", label: "Lebih dari 2 kelompok" },
+                { value: "dua", label: t("wizard_opt_dua") },
+                { value: "lebih_dari_dua", label: t("wizard_opt_lebih_dari_dua") },
               ]}
               onChange={(v) => update({ jumlah_kelompok: v as WizardAnswers["jumlah_kelompok"] })}
             />
@@ -110,11 +112,11 @@ export default function WizardPage() {
 
           {answers.tujuan === "bandingkan" && answers.jumlah_kelompok === "dua" && (
             <Question
-              label="Desain kelompoknya?"
+              label={t("wizard_q_desain")}
               value={answers.desain}
               options={[
-                { value: "independen", label: "Independen (subjek berbeda)" },
-                { value: "berpasangan", label: "Berpasangan (subjek sama, 2 waktu)" },
+                { value: "independen", label: t("wizard_opt_independen") },
+                { value: "berpasangan", label: t("wizard_opt_berpasangan") },
               ]}
               onChange={(v) => update({ desain: v as WizardAnswers["desain"] })}
             />
@@ -122,12 +124,12 @@ export default function WizardPage() {
 
           {answers.tujuan === "hubungan" && (
             <Question
-              label="Tipe kedua variabel?"
+              label={t("wizard_q_tipe_variabel")}
               value={answers.tipe_variabel_hubungan}
               options={[
-                { value: "keduanya_numerik", label: "Keduanya numerik" },
-                { value: "keduanya_kategorik", label: "Keduanya kategorik" },
-                { value: "campuran", label: "Campuran (1 numerik, 1 kategorik)" },
+                { value: "keduanya_numerik", label: t("wizard_opt_keduanya_numerik") },
+                { value: "keduanya_kategorik", label: t("wizard_opt_keduanya_kategorik") },
+                { value: "campuran", label: t("wizard_opt_campuran") },
               ]}
               onChange={(v) => update({ tipe_variabel_hubungan: v as WizardAnswers["tipe_variabel_hubungan"] })}
             />
@@ -135,11 +137,11 @@ export default function WizardPage() {
 
           {answers.tujuan === "hubungan" && answers.tipe_variabel_hubungan === "campuran" && (
             <Question
-              label="Berapa kelompok pada variabel kategoriknya?"
+              label={t("wizard_q_jumlah_kelompok_campuran")}
               value={answers.jumlah_kelompok}
               options={[
-                { value: "dua", label: "2 kelompok" },
-                { value: "lebih_dari_dua", label: "Lebih dari 2 kelompok" },
+                { value: "dua", label: t("wizard_opt_dua") },
+                { value: "lebih_dari_dua", label: t("wizard_opt_lebih_dari_dua") },
               ]}
               onChange={(v) => update({ jumlah_kelompok: v as WizardAnswers["jumlah_kelompok"] })}
             />
@@ -147,7 +149,7 @@ export default function WizardPage() {
 
           {isReady(answers) && (
             <button onClick={() => submitAnswers(answers as WizardAnswers)} className="btn-duo-green w-fit">
-              Dapatkan Rekomendasi ✨
+              {t("wizard_get_recommendation")}
             </button>
           )}
           {error && <p className="text-sm font-bold text-duo-red-dark">⚠ {error}</p>}
@@ -158,7 +160,7 @@ export default function WizardPage() {
         <div className="card-duo-blue flex flex-col gap-4">
           <p className="text-sm font-semibold text-duo-gray">{recommendation.reasoning}</p>
           <p className="font-black text-duo-blue-dark">
-            🎯 Uji direkomendasikan: {testId.replaceAll("_", " ")}
+            {t("wizard_recommended_test").replace("{test}", testId.replaceAll("_", " "))}
           </p>
           <ul className="flex flex-col gap-1 text-xs font-semibold text-duo-gray-soft">
             {recommendation.required_variable_roles.map((r) => (
@@ -169,26 +171,26 @@ export default function WizardPage() {
           <div className="grid gap-3 rounded-2xl bg-white p-4 sm:grid-cols-2">
             {(NEEDS_GROUPING.includes(testId) || testId === "independent_ttest") && (
               <>
-                <Select label="Variabel Dependen (numerik)" options={numericCols} value={mapping.dependent ?? ""} onChange={(v) => updateMapping({ dependent: v })} />
-                <Select label="Variabel Pengelompokan" options={categoricalCols} value={mapping.grouping ?? ""} onChange={(v) => updateMapping({ grouping: v })} />
+                <Select label={t("wizard_map_dependent_numeric")} options={numericCols} value={mapping.dependent ?? ""} onChange={(v) => updateMapping({ dependent: v })} />
+                <Select label={t("wizard_map_grouping")} options={categoricalCols} value={mapping.grouping ?? ""} onChange={(v) => updateMapping({ grouping: v })} />
               </>
             )}
             {NEEDS_PAIR.includes(testId) && (
               <>
-                <Select label="Kolom Pengukuran 1" options={numericCols} value={mapping.items?.[0] ?? ""} onChange={(v) => updateMapping({ items: [v, mapping.items?.[1] ?? ""] })} />
-                <Select label="Kolom Pengukuran 2" options={numericCols} value={mapping.items?.[1] ?? ""} onChange={(v) => updateMapping({ items: [mapping.items?.[0] ?? "", v] })} />
+                <Select label={t("wizard_map_measure1")} options={numericCols} value={mapping.items?.[0] ?? ""} onChange={(v) => updateMapping({ items: [v, mapping.items?.[1] ?? ""] })} />
+                <Select label={t("wizard_map_measure2")} options={numericCols} value={mapping.items?.[1] ?? ""} onChange={(v) => updateMapping({ items: [mapping.items?.[0] ?? "", v] })} />
               </>
             )}
             {NEEDS_XY.includes(testId) && (
               <>
                 <Select
-                  label={testId === "chi_square" ? "Variabel Kategorik 1" : "Variabel Independen (X)"}
+                  label={testId === "chi_square" ? t("wizard_map_categorical1") : t("wizard_map_independent_x")}
                   options={testId === "chi_square" ? categoricalCols : numericCols}
                   value={mapping.independent ?? ""}
                   onChange={(v) => updateMapping({ independent: v })}
                 />
                 <Select
-                  label={testId === "chi_square" ? "Variabel Kategorik 2" : "Variabel Dependen (Y)"}
+                  label={testId === "chi_square" ? t("wizard_map_categorical2") : t("wizard_map_dependent_y")}
                   options={testId === "chi_square" ? categoricalCols : numericCols}
                   value={mapping.dependent ?? ""}
                   onChange={(v) => updateMapping({ dependent: v })}
@@ -197,7 +199,7 @@ export default function WizardPage() {
             )}
             {testId === "cronbach_alpha" && dataset.constructs.length > 0 && (
               <div className="sm:col-span-2">
-                <p className="mb-1 text-sm font-bold text-duo-gray">Pilih dari Konstruk yang Sudah Dirancang</p>
+                <p className="mb-1 text-sm font-bold text-duo-gray">{t("wizard_map_pick_construct")}</p>
                 <div className="flex flex-wrap gap-2">
                   {dataset.constructs.map((c) => (
                     <button
@@ -205,7 +207,7 @@ export default function WizardPage() {
                       onClick={() => updateMapping({ items: c.items })}
                       className="rounded-xl border-2 border-duo-yellow-dark bg-duo-yellow-light px-3 py-1.5 text-xs font-bold text-duo-gray"
                     >
-                      🧩 {c.name} ({c.items.length} item)
+                      🧩 {c.name} ({c.items.length} {t("wizard_map_item_unit")})
                     </button>
                   ))}
                 </div>
@@ -213,7 +215,7 @@ export default function WizardPage() {
             )}
             {NEEDS_ITEMS.includes(testId) && (
               <MultiSelect
-                label={testId === "cronbach_alpha" ? "Item Kuesioner" : "Variabel"}
+                label={testId === "cronbach_alpha" ? t("wizard_map_questionnaire_items") : t("wizard_map_variable")}
                 options={testId === "cronbach_alpha" ? [...numericCols, ...categoricalCols] : numericCols}
                 value={mapping.items ?? []}
                 onChange={(v) => updateMapping({ items: v })}
@@ -222,13 +224,13 @@ export default function WizardPage() {
             {NEEDS_LOGISTIC.includes(testId) && (
               <>
                 <Select
-                  label="Variabel Dependen (kejadian, biner)"
+                  label={t("wizard_map_dependent_binary")}
                   options={categoricalCols}
                   value={mapping.dependent ?? ""}
                   onChange={(v) => updateMapping({ dependent: v })}
                 />
                 <MultiSelect
-                  label="Variabel Independen (faktor risiko/prediktor)"
+                  label={t("wizard_map_independent_predictors")}
                   options={[...numericCols, ...categoricalCols]}
                   value={mapping.independents ?? []}
                   onChange={(v) => updateMapping({ independents: v })}
@@ -238,13 +240,13 @@ export default function WizardPage() {
             {NEEDS_DIAGNOSTIC.includes(testId) && (
               <>
                 <Select
-                  label="Hasil Uji Diagnostik (biner)"
+                  label={t("wizard_map_diagnostic_result")}
                   options={categoricalCols}
                   value={mapping.independent ?? ""}
                   onChange={(v) => updateMapping({ independent: v })}
                 />
                 <Select
-                  label="Status Penyakit (baku emas, biner)"
+                  label={t("wizard_map_disease_status")}
                   options={categoricalCols}
                   value={mapping.dependent ?? ""}
                   onChange={(v) => updateMapping({ dependent: v })}
@@ -254,13 +256,13 @@ export default function WizardPage() {
             {NEEDS_ROC.includes(testId) && (
               <>
                 <Select
-                  label="Variabel Skor/Prediktor (numerik)"
+                  label={t("wizard_map_score_predictor")}
                   options={numericCols}
                   value={mapping.independent ?? ""}
                   onChange={(v) => updateMapping({ independent: v })}
                 />
                 <Select
-                  label="Variabel Outcome (baku emas, biner)"
+                  label={t("wizard_map_outcome_gold")}
                   options={categoricalCols}
                   value={mapping.dependent ?? ""}
                   onChange={(v) => updateMapping({ dependent: v })}
@@ -270,19 +272,19 @@ export default function WizardPage() {
             {NEEDS_SURVIVAL.includes(testId) && (
               <>
                 <Select
-                  label="Variabel Durasi/Waktu (numerik)"
+                  label={t("wizard_map_duration")}
                   options={numericCols}
                   value={mapping.dependent ?? ""}
                   onChange={(v) => updateMapping({ dependent: v })}
                 />
                 <Select
-                  label="Status Kejadian (biner: kejadian/tersensor)"
+                  label={t("wizard_map_event_status")}
                   options={categoricalCols}
                   value={mapping.event_col ?? ""}
                   onChange={(v) => updateMapping({ event_col: v })}
                 />
                 <Select
-                  label="Variabel Kelompok (opsional, untuk uji log-rank)"
+                  label={t("wizard_map_group_optional")}
                   options={categoricalCols}
                   value={mapping.grouping ?? ""}
                   onChange={(v) => updateMapping({ grouping: v || null })}
@@ -293,10 +295,10 @@ export default function WizardPage() {
 
           <div className="flex gap-3">
             <button onClick={() => setRecommendation(null)} className="btn-duo-outline">
-              ↺ Ulangi
+              {t("wizard_redo")}
             </button>
             <button onClick={() => router.push("/assumptions")} className="btn-duo-green">
-              Lanjut ke Cek Asumsi →
+              {t("wizard_continue_assumptions")}
             </button>
           </div>
         </div>
@@ -362,11 +364,12 @@ function Select({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const { t } = useLanguage();
   return (
     <label className="flex flex-col gap-1 text-sm">
       <span className="font-bold text-duo-gray">{label}</span>
       <select value={value} onChange={(e) => onChange(e.target.value)} className="input-duo">
-        <option value="">-- pilih kolom --</option>
+        <option value="">{t("wizard_select_placeholder")}</option>
         {options.map((o) => (
           <option key={o} value={o}>
             {o}
