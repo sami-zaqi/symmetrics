@@ -1,3 +1,8 @@
+"use client";
+
+import { useRef } from "react";
+import CopyTableButton from "@/components/CopyTableButton";
+
 const LABEL_OVERRIDES: Record<string, string> = {
   group: "Kelompok",
   variable: "Variabel",
@@ -118,55 +123,63 @@ function formatValue(v: unknown): string {
 }
 
 export function DescriptivesTable({ rows }: { rows: Record<string, unknown>[] }) {
+  const tableRef = useRef<HTMLTableElement>(null);
   if (!rows || rows.length === 0) {
     return <p className="text-xs font-semibold text-duo-gray-soft">Tidak ada data deskriptif.</p>;
   }
   const keys = Object.keys(rows[0]);
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-xs">
-        <thead>
-          <tr className="border-b-2 border-duo-gray-light">
-            {keys.map((k) => (
-              <th key={k} className="px-2 py-1.5 font-black text-duo-gray whitespace-nowrap">
-                {prettifyKey(k)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-duo-gray-light/50">
+    <div className="flex flex-col gap-2">
+      <div className="overflow-x-auto">
+        <table ref={tableRef} className="w-full text-left text-xs">
+          <thead>
+            <tr className="border-b-2 border-duo-gray-light">
               {keys.map((k) => (
-                <td key={k} className="px-2 py-1.5 font-semibold text-duo-gray-soft">
-                  {formatValue(row[k])}
-                </td>
+                <th key={k} className="px-2 py-1.5 font-black text-duo-gray whitespace-nowrap">
+                  {prettifyKey(k)}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i} className="border-b border-duo-gray-light/50">
+                {keys.map((k) => (
+                  <td key={k} className="px-2 py-1.5 font-semibold text-duo-gray-soft">
+                    {formatValue(row[k])}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <CopyTableButton tableRef={tableRef} />
     </div>
   );
 }
 
 export function StatSummary({ stats }: { stats: Record<string, unknown> }) {
+  const tableRef = useRef<HTMLTableElement>(null);
   const entries = Object.entries(stats);
   if (entries.length === 0) {
     return <p className="text-xs font-semibold text-duo-gray-soft">Tidak ada hasil uji.</p>;
   }
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left text-xs">
-        <tbody>
-          {entries.map(([k, v]) => (
-            <tr key={k} className="border-b border-duo-gray-light/50">
-              <td className="px-2 py-1.5 font-black text-duo-gray whitespace-nowrap align-top">{prettifyKey(k)}</td>
-              <td className="px-2 py-1.5 font-semibold text-duo-gray-soft">{formatValue(v)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="flex flex-col gap-2">
+      <div className="overflow-x-auto">
+        <table ref={tableRef} className="w-full text-left text-xs">
+          <tbody>
+            {entries.map(([k, v]) => (
+              <tr key={k} className="border-b border-duo-gray-light/50">
+                <td className="px-2 py-1.5 font-black text-duo-gray whitespace-nowrap align-top">{prettifyKey(k)}</td>
+                <td className="px-2 py-1.5 font-semibold text-duo-gray-soft">{formatValue(v)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <CopyTableButton tableRef={tableRef} />
     </div>
   );
 }

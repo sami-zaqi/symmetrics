@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/SessionContext";
 import StepProgress from "@/components/StepProgress";
 import { DescriptivesTable, StatSummary } from "@/components/ResultTables";
+import { downloadBase64Png } from "@/lib/exportUtils";
 
 export default function ResultsPage() {
   const {
@@ -120,12 +121,19 @@ export default function ResultsPage() {
           {currentResult.charts.length > 0 && (
             <div className="flex flex-wrap gap-4">
               {currentResult.charts.map((c) => (
-                <img
-                  key={c.caption_id}
-                  src={`data:image/png;base64,${c.image_base64}`}
-                  alt={c.caption_id}
-                  className="rounded-3xl border-2 border-duo-gray-light bg-white p-2"
-                />
+                <div key={c.caption_id} className="flex flex-col gap-2">
+                  <img
+                    src={`data:image/png;base64,${c.image_base64}`}
+                    alt={c.caption_id}
+                    className="rounded-3xl border-2 border-duo-gray-light bg-white p-2"
+                  />
+                  <button
+                    onClick={() => downloadBase64Png(c.image_base64, `${currentResult.test_id}_${c.caption_id}`)}
+                    className="btn-duo-outline btn-duo-sm w-fit"
+                  >
+                    ⬇ Unduh PNG
+                  </button>
+                </div>
               ))}
             </div>
           )}
