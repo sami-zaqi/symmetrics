@@ -4,6 +4,7 @@ backend/__pycache__/
 backend/**/__pycache__/
 backend/.env
 backend/.local_state/
+backend/*.log
 *.pyc
 
 # Node / Next.js
@@ -11,6 +12,7 @@ frontend/node_modules/
 frontend/.next/
 frontend/.env.local
 frontend/out/
+frontend/*.log
 
 # Electron desktop wrapper
 desktop/node_modules/
